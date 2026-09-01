@@ -18,3 +18,15 @@ Snapshots use canonical decimal strings for exact JSON round-trips. Restore is
 transactional and keeps acquired stream handles valid. Any change to stream
 names, derivation, snapshot shape, or golden sequences requires an explicit
 `simulation_version` compatibility decision.
+
+## Stats
+
+`stats/StatRegistry` publishes stable stat definitions and defaults.
+`stats/StatResolver` is the only owner of the seven modifier stages and returns
+an immutable `StatSnapshot` for a specific simulation tick. Consumers use
+snapshot values and explanations; they do not calculate or cache alternative
+final values.
+
+Condition systems supply active stable IDs. Conversion is simultaneous and
+non-cascading, while priority and source ordering make conflict resolution
+independent of modifier input order.

@@ -118,6 +118,10 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             godot_base + ["--script", "res://tests/production/test_rng_streams.gd"],
         ),
         TestCommand(
+            "production-stats",
+            godot_base + ["--script", "res://tests/production/test_stats.gd"],
+        ),
+        TestCommand(
             "performance-baseline",
             godot_base
             + [
