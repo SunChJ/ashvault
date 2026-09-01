@@ -66,6 +66,18 @@ The following versions are independent:
 
 External research IDs never become canonical content IDs.
 
+### Catalog publication
+
+Catalog loading is transactional. Definitions are staged, then the complete
+set is validated for ID syntax, duplicate IDs, registered tags, dependency
+existence, duplicate dependencies, and dependency cycles. Any error rejects the
+entire catalog without freezing inputs or publishing partial lookup state.
+
+A successful load freezes every definition and the tag registry before making
+the catalog available to a composition root. Definition array properties return
+copies, and later scalar assignment or reconfiguration cannot mutate published
+content. Gameplay may start only with a successfully loaded catalog.
+
 ## 4. Commands and simulation clock
 
 Simulation advances on a fixed tick. Presentation frame rate does not determine

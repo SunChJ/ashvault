@@ -42,6 +42,7 @@ class CiTestRunnerTests(unittest.TestCase):
             [
                 "python-tests",
                 "production-identity-contracts",
+                "production-content-catalog",
                 "numerical-core",
                 "numerical-sketch",
                 "main-scene-smoke",

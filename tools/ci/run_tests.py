@@ -94,6 +94,11 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             + ["--script", "res://tests/production/test_identity_contracts.gd"],
         ),
         TestCommand(
+            "production-content-catalog",
+            godot_base
+            + ["--script", "res://tests/production/test_content_catalog.gd"],
+        ),
+        TestCommand(
             "numerical-core",
             godot_base + ["--script", "res://tests/test_numerical_core.gd"],
         ),
