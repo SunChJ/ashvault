@@ -108,3 +108,6 @@ ceiling.
 - Updated 2026-09-01: abilities use immutable effect graphs, validated rank
   transforms, and transactional typed execution outputs — see
   [`008-ability-effects.md`](008-ability-effects.md).
+- Updated 2026-09-01: runtime entities advance through atomic fixed-tick
+  command batches and publish immutable presentation snapshots — see
+  [`009-entity-command-snapshots.md`](009-entity-command-snapshots.md).

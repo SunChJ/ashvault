@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "batches": [
+    {
+      "tick": 1,
+      "commands": [
+        {
+          "tick": 1,
+          "actor_id": 1,
+          "command_type": "command.aim",
+          "aim_vector": [0.0, 1.0],
+          "ability_slot": -1,
+          "client_sequence": 2
+        },
+        {
+          "tick": 1,
+          "actor_id": 1,
+          "command_type": "command.move",
+          "aim_vector": [1.0, 0.0],
+          "ability_slot": -1,
+          "client_sequence": 1
+        }
+      ]
+    },
+    {
+      "tick": 2,
+      "commands": [
+        {
+          "tick": 2,
+          "actor_id": 1,
+          "command_type": "command.cast_start",
+          "aim_vector": [0.0, 1.0],
+          "ability_slot": 0,
+          "client_sequence": 3
+        }
+      ]
+    },
+    {
+      "tick": 3,
+      "commands": [
+        {
+          "tick": 3,
+          "actor_id": 1,
+          "command_type": "command.cast_release",
+          "aim_vector": [0.0, 1.0],
+          "ability_slot": 0,
+          "client_sequence": 4
+        }
+      ]
+    },
+    {
+      "tick": 4,
+      "commands": []
+    }
+  ]
+}

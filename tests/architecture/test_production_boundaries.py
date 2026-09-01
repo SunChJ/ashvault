@@ -26,6 +26,7 @@ GLOBAL_RANDOM_CALL = re.compile(
 )
 RNG_WRAPPER = PRODUCTION_ROOT / "simulation/random/deterministic_rng_stream.gd"
 ABILITY_EXECUTOR = PRODUCTION_ROOT / "simulation/abilities/ability_executor.gd"
+SCENE_DRIVEN_SIMULATION = re.compile(r"^extends\s+(?:Node\w*|SceneTree)\s*$", re.MULTILINE)
 FORBIDDEN_DEPENDENCIES = {
     "content": {"simulation", "presentation", "infrastructure"},
     "simulation": {"presentation", "infrastructure"},
@@ -129,6 +130,19 @@ class ProductionBoundaryTests(unittest.TestCase):
             "item_name",
             contents,
             "Ability execution must not branch on localized or authored item names.",
+        )
+
+    def test_simulation_is_not_scene_tree_driven(self) -> None:
+        violations: list[str] = []
+        for path in sorted((PRODUCTION_ROOT / "simulation").rglob("*.gd")):
+            contents = path.read_text(encoding="utf-8")
+            if SCENE_DRIVEN_SIMULATION.search(contents):
+                violations.append(str(path.relative_to(REPOSITORY_ROOT)))
+
+        self.assertEqual(
+            violations,
+            [],
+            "Production simulation state must remain scene-independent.",
         )
 
 
