@@ -45,6 +45,11 @@ Stable content IDs use lowercase dotted names, for example
 `ability.stormweaver.arc_bolt`. IDs are never derived from localized names or
 filesystem locations.
 
+An ID contains at least two dot-separated segments. Each segment starts with a
+lowercase ASCII letter and may then contain lowercase ASCII letters, digits, or
+underscores. Leading/trailing dots, empty segments, hyphens, whitespace, and
+uppercase characters are invalid; values are rejected rather than normalized.
+
 Tags use a validated registry and lowercase dotted names, such as
 `damage.lightning`, `delivery.projectile`, and `event.kill`. Unknown IDs or tags
 fail content validation before a run starts.
