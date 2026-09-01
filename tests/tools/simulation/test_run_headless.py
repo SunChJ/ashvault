@@ -27,9 +27,13 @@ class HeadlessSimulationCliTests(unittest.TestCase):
                 "--duration-seconds", "2",
                 "--output", str(output),
             ])
-            command = build_godot_command(Path("/godot"), arguments)
+            godot = Path("/godot")
+            command = build_godot_command(godot, arguments)
 
-        self.assertEqual(command[:6], ["/godot", "--headless", "--path", str(PROJECT_ROOT), "--script", SCRIPT_PATH])
+        self.assertEqual(
+            command[:6],
+            [str(godot), "--headless", "--path", str(PROJECT_ROOT), "--script", SCRIPT_PATH],
+        )
         self.assertIn("--root-seed", command)
         self.assertIn("42", command)
         self.assertEqual(command[-2:], ["--output", str(output.resolve())])
