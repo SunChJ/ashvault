@@ -102,3 +102,6 @@ ceiling.
 - Updated 2026-09-01: all hit damage resolves through one immutable staged
   context/result contract with single-point health rounding — see
   [`006-damage-pipeline.md`](006-damage-pipeline.md).
+- Updated 2026-09-01: combat reactions expand through a deterministic FIFO
+  event queue with bounded proc chains and explicit diagnostics — see
+  [`007-combat-event-queue.md`](007-combat-event-queue.md).

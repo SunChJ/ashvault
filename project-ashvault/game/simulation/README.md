@@ -43,3 +43,16 @@ Damage remains floating point across all stages. Health mutation uses only
 `DamageResult.committed_amount()`, which rounds the summed final components
 once. Conversion is simultaneous and non-cascading, and every result retains
 component, mitigation, and source provenance.
+
+## Combat events
+
+`events/CombatEventQueue` is the only publisher and executor of combat events.
+Handlers return immutable emission descriptions; they never invoke proc logic
+or enqueue children recursively. The queue owns monotonic IDs, FIFO execution,
+stable emission ordering, chain depth, self-reentry policy, and per-tick budget
+diagnostics.
+
+Root events start at depth zero. Depth eight is processable and depth nine is
+denied. A trigger cannot appear twice in one chain trace unless its definition
+explicitly allows self-reentry. Budget exhaustion fails the process result and
+retains pending events instead of silently dropping them.
