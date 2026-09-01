@@ -26,8 +26,8 @@ for later milestones. Their status is explicit:
 | --- | --- |
 | Sections 2–3 | Implemented and frozen in M0 |
 | M0 performance report contract in section 12 | Implemented and frozen in M0 |
-| Section 5 | Implemented in M1-01 and compatibility-controlled |
-| Sections 4 and 6–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
+| Sections 5–6 | Implemented in M1-01/M1-02 and compatibility-controlled |
+| Section 4, sections 7–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
 
 The frozen public surface is:
 
@@ -180,6 +180,7 @@ value
 source_id
 condition_id?
 priority
+target_stat_id? # CONVERSION only
 ```
 
 Supported operations resolve in this order:
@@ -192,12 +193,35 @@ Supported operations resolve in this order:
 6. `OVERRIDE`
 7. `CAP`
 
-`INCREASED` values add within one bucket. `MORE` values multiply. Conversion is
-normalized so a source type cannot convert more than 100%; over-allocation uses
-stable priority then source ID ordering. Caps apply after overrides.
+The registered default value is an implicit base. Explicit `BASE` and `FLAT`
+values add in their respective stages. `INCREASED` values add within one bucket
+and multiply once by `1 + bucket`; each `MORE` value multiplies by `1 + value`.
+
+Modifiers resolve by descending numeric priority then ascending `source_id`.
+A source may contribute at most one modifier for the same stat, operation, and
+condition. Duplicate identities are validation errors rather than insertion
+order tie-breaks.
+
+Conversion values are fractions from 0 through 1 and require a distinct target
+stat. A source stat allocates at most 100% in stable modifier order. All
+converted amounts use the pre-conversion snapshot and apply simultaneously, so
+incoming conversion cannot cascade during the same stage. The highest
+precedence active `OVERRIDE` wins; remaining overrides are recorded as
+shadowed. Every `CAP` is a maximum constraint and applies after the override.
+
+Condition evaluation is external to stat resolution. The resolver receives the
+active stable condition IDs and records inactive conditional modifiers rather
+than silently discarding them.
 
 Stat aggregation produces an immutable snapshot for one simulation tick.
-Definitions contribute modifiers but never write final values directly.
+Definitions contribute modifiers but never write final values directly. A
+snapshot owns copies of final values and per-stat explanations containing
+applied sources, skipped sources with reasons, conversion allocation, and
+incoming conversion. Callers receive deep copies and cannot mutate the
+published tick state.
+
+Operation ordinals, ordering, conversion semantics, priority direction, and
+snapshot fields are `simulation_version` compatibility contracts.
 
 ## 7. Damage pipeline
 

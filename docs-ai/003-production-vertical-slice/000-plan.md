@@ -96,3 +96,6 @@ ceiling.
 - Updated 2026-09-01: combat, loot, and dungeon randomness use independently
   restorable named streams — see
   [`004-deterministic-rng-streams.md`](004-deterministic-rng-streams.md).
+- Updated 2026-09-01: stats resolve through a registered seven-stage pipeline
+  into immutable, explainable tick snapshots — see
+  [`005-stat-resolution.md`](005-stat-resolution.md).
