@@ -30,3 +30,16 @@ final values.
 Condition systems supply active stable IDs. Conversion is simultaneous and
 non-cascading, while priority and source ordering make conflict resolution
 independent of modifier input order.
+
+## Combat damage
+
+`combat/DamagePipeline` is the only owner of hit-damage arithmetic and the only
+publisher of immutable `DamageResult` values. Callers construct a validated
+`DamageContext` from resolved stats and an externally sampled combat critical
+roll. Abilities, items, statuses, entities, and presentation consume contexts
+or results; they must not implement alternate damage formulas.
+
+Damage remains floating point across all stages. Health mutation uses only
+`DamageResult.committed_amount()`, which rounds the summed final components
+once. Conversion is simultaneous and non-cascading, and every result retains
+component, mitigation, and source provenance.
