@@ -61,6 +61,29 @@ func _test_tag_registry() -> void:
 		registry.register_tag("Damage.Fire").contains("Invalid tag"),
 		"Invalid tags must return a diagnostic."
 	)
+	_assert_equal(
+		registry.register_tags(["delivery.projectile", "event.hit"]),
+		PackedStringArray(),
+		"A valid tag batch must register atomically."
+	)
+	_assert_equal(
+		registry.all_tags(),
+		PackedStringArray(["damage.lightning", "delivery.projectile", "event.hit"]),
+		"Published tags must be sorted and stable."
+	)
+
+	var batch_errors := registry.register_tags(["damage.cold", "Damage.Invalid"])
+	_assert_true(batch_errors.size() == 1, "An invalid batch must report its errors.")
+	_assert_true(
+		not registry.contains("damage.cold"),
+		"An invalid tag batch must not partially mutate the registry."
+	)
+	var duplicate_errors := registry.register_tags(["damage.fire", "damage.fire"])
+	_assert_true(duplicate_errors.size() == 1, "Batch-local duplicates must be diagnosed.")
+	_assert_true(
+		not registry.contains("damage.fire"),
+		"A duplicate tag batch must not partially mutate the registry."
+	)
 
 	var unknown_errors := registry.validate_known(["damage.lightning", "damage.cold"])
 	_assert_true(unknown_errors.size() == 1, "Exactly one unknown tag must be reported.")
