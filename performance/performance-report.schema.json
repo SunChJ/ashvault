@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SunChJ/ashvault/blob/main/performance/performance-report.schema.json",
+  "title": "Ashvault Simulation Performance Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "benchmark_id",
+    "captured_at_utc",
+    "simulation_version",
+    "rendering_enabled",
+    "runtime",
+    "workload",
+    "sample_count",
+    "tick_time_usec",
+    "entity_count"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "benchmark_id": { "type": "string", "minLength": 1 },
+    "captured_at_utc": { "type": "string", "format": "date-time" },
+    "simulation_version": { "type": "integer", "minimum": 1 },
+    "rendering_enabled": { "const": false },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["godot_version", "platform", "processor", "model"],
+      "properties": {
+        "godot_version": { "type": "string", "minLength": 1 },
+        "platform": { "type": "string", "minLength": 1 },
+        "processor": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["warmup_ticks", "sample_ticks", "actors", "projectiles"],
+      "properties": {
+        "warmup_ticks": { "type": "integer", "minimum": 0 },
+        "sample_ticks": { "type": "integer", "minimum": 1 },
+        "actors": { "type": "integer", "minimum": 0 },
+        "projectiles": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sample_count": { "type": "integer", "minimum": 1 },
+    "tick_time_usec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mean", "p50", "p95", "p99", "max"],
+      "properties": {
+        "mean": { "type": "number", "minimum": 0 },
+        "p50": { "type": "integer", "minimum": 0 },
+        "p95": { "type": "integer", "minimum": 0 },
+        "p99": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "entity_count": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "mean", "peak"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0 },
+        "mean": { "type": "number", "minimum": 0 },
+        "peak": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

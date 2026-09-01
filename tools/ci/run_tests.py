@@ -74,6 +74,9 @@ def validate_godot_version(
 
 def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
     project_root = repository_root / "project-ashvault"
+    performance_report = (
+        repository_root / ".artifacts" / "performance" / "ci-baseline.json"
+    )
     godot_base = [str(godot), "--headless", "--path", str(project_root)]
     return [
         TestCommand(
@@ -85,6 +88,7 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
                 "tests/architecture/test_production_boundaries.py",
                 "tests/tools/ci/test_run_tests.py",
                 "tests/tools/ci/test_workflow_contract.py",
+                "tests/tools/performance/test_validate_report.py",
                 "tests/tools/research/test_sync_hero_siege.py",
             ],
         ),
@@ -97,6 +101,31 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             "production-content-catalog",
             godot_base
             + ["--script", "res://tests/production/test_content_catalog.gd"],
+        ),
+        TestCommand(
+            "production-performance-metrics",
+            godot_base
+            + ["--script", "res://tests/production/test_performance_metrics.gd"],
+        ),
+        TestCommand(
+            "performance-baseline",
+            godot_base
+            + [
+                "--script",
+                "res://tools/performance/run_baseline.gd",
+                "--",
+                "--output",
+                str(performance_report),
+            ],
+        ),
+        TestCommand(
+            "performance-report-schema",
+            [
+                sys.executable,
+                "-m",
+                "tools.performance.validate_report",
+                str(performance_report),
+            ],
         ),
         TestCommand(
             "numerical-core",
