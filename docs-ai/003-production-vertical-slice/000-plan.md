@@ -87,3 +87,7 @@ ceiling.
 - Product implementation is not started until M0 contracts pass review.
 
 ## Amendments
+
+- Updated 2026-09-01: executable Issues must be delivered through linked PRs
+  rather than direct pushes and manual closure — see
+  [`002-pr-linked-delivery.md`](002-pr-linked-delivery.md).

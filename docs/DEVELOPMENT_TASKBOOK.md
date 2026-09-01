@@ -32,6 +32,11 @@ combined simulation/presentation structure.
 - `S`, `M`, and `L` express relative complexity, not time estimates.
 - Every task has exactly one GitHub Milestone, type, priority, and size.
 - A task may start only when all `Blocked by` tasks are closed.
+- Every executable task uses a dedicated `task-key-short-slug` branch and a PR
+  whose body contains `Closes #N`. Merging the PR closes the Issue; direct
+  closure is reserved for explicitly documented administrative or superseded
+  work.
+- Direct pushes to `main` are not an implementation delivery path.
 - Stable behavior is developed test-first where practical.
 - Product rules live in the kernel or content definitions, never in UI/VFX.
 - Any public contract change updates
