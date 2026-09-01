@@ -117,3 +117,6 @@ ceiling.
 - Updated 2026-09-01: M1 closes through a machine-readable correctness,
   determinism, architecture, and reference-performance gate — see
   [`011-m1-kernel-gate.md`](011-m1-kernel-gate.md).
+- Updated 2026-09-01: M2 starts with action-mapped input commands and optional
+  fixed-tick swept-AABB player movement — see
+  [`012-player-input-movement.md`](012-player-input-movement.md).

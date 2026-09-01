@@ -129,8 +129,16 @@ client_sequence
 The slice uses the stable command IDs `command.move`, `command.aim`,
 `command.cast_start`, `command.cast_release`, and `command.cancel`. The
 `aim_vector` field carries movement input for `command.move` and aim intent for
-the other directional commands. It is an input value only in M1-06; M2 owns
-spatial integration and cast timing.
+the other directional commands. `KeyboardMouseCommandAdapter` reads named
+InputMap actions, converts mouse position to world aim, suppresses unchanged
+intent, and emits these DTOs only. Physical key bindings are presentation data
+and have no simulation dependency.
+
+When a movement environment is configured, every living player-controlled
+entity integrates its retained movement input once per accepted tick. Arena
+bounds and static rectangular obstacles are expanded by actor radius and
+resolved with continuous X-then-Y sweeps. This prevents tunneling and makes
+wall sliding deterministic without a scene, rendered frame, or physics server.
 
 One tick is a transaction. Commands are staged in actor-ID/client-sequence
 order, and the complete staged batch publishes only when every transition is
@@ -149,9 +157,11 @@ not imply networking in the slice.
 The simulation publishes immutable `PresentationSnapshot` values sorted by
 runtime entity ID. Each snapshot includes a SHA-256 hash of the authoritative
 tick, fixed-rate identifier, entity state, and accepted client-sequence state.
-Hash input uses canonical ordered arrays with schema version 1; dictionary
-iteration order is never hashed. Constructing snapshots is a pure read, so
-disabling presentation cannot change authoritative state or replay hashes.
+Worlds without movement preserve canonical hash schema version 1. Movement
+worlds use schema version 2 and include normalized collision configuration.
+Dictionary iteration order is never hashed. Constructing snapshots is a pure
+read, so disabling presentation cannot change authoritative state or replay
+hashes.
 
 ## 5. Deterministic RNG
 
