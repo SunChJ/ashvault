@@ -114,6 +114,10 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             + ["--script", "res://tests/production/test_performance_metrics.gd"],
         ),
         TestCommand(
+            "production-rng-streams",
+            godot_base + ["--script", "res://tests/production/test_rng_streams.gd"],
+        ),
+        TestCommand(
             "performance-baseline",
             godot_base
             + [
@@ -145,22 +149,41 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
     ]
 
 
-def run_all(commands: Sequence[TestCommand], repository_root: Path) -> int:
+def run_all(
+    commands: Sequence[TestCommand],
+    repository_root: Path,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> int:
     github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
     for command in commands:
         if github_actions:
             print(f"::group::{command.name}", flush=True)
         print(f"$ {shlex.join(command.arguments)}", flush=True)
-        completed = subprocess.run(command.arguments, cwd=repository_root, check=False)
+        completed = runner(
+            command.arguments,
+            cwd=repository_root,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        output = completed.stdout or ""
+        if output:
+            print(output, end="" if output.endswith("\n") else "\n", flush=True)
+        godot_output_error = "--headless" in command.arguments and any(
+            line.lstrip().startswith(("ERROR:", "SCRIPT ERROR:"))
+            for line in output.splitlines()
+        )
+        return_code = completed.returncode or (1 if godot_output_error else 0)
         if github_actions:
             print("::endgroup::", flush=True)
-        if completed.returncode != 0:
+        if return_code != 0:
             if github_actions:
                 print(
-                    f"::error title={command.name} failed::Exit code {completed.returncode}",
+                    f"::error title={command.name} failed::Exit code {return_code}",
                     flush=True,
                 )
-            return completed.returncode
+            return return_code
     return 0
 
 

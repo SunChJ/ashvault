@@ -16,6 +16,10 @@ var _projectile_positions := PackedVector2Array()
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	if DisplayServer.get_name() != "headless":
 		push_error("Performance baselines must run with --headless.")
 		quit(2)

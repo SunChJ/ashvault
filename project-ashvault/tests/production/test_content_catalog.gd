@@ -8,6 +8,10 @@ var failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	_test_valid_catalog_is_published_and_frozen()
 	_test_duplicate_ids_are_rejected()
 	_test_unknown_tags_are_rejected()

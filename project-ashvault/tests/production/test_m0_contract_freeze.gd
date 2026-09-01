@@ -11,6 +11,10 @@ var failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	_test_stable_identity_contract()
 	_test_version_contract()
 	_test_public_method_surface()

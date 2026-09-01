@@ -26,7 +26,8 @@ for later milestones. Their status is explicit:
 | --- | --- |
 | Sections 2–3 | Implemented and frozen in M0 |
 | M0 performance report contract in section 12 | Implemented and frozen in M0 |
-| Sections 4–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
+| Section 5 | Implemented in M1-01 and compatibility-controlled |
+| Sections 4 and 6–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
 
 The frozen public surface is:
 
@@ -138,8 +139,35 @@ Every run owns named RNG streams:
 Each stream exposes seed and serializable state. Adding a loot roll must not
 change dungeon generation. Gameplay code may not use global random functions.
 
+`RngStreams` owns all production randomness. It derives each stream seed from
+the first 56 bits of SHA-256 over
+`ashvault.rng.v1|<root_seed>|<stream_name>`, then owns one wrapped Godot
+`RandomNumberGenerator` per stream. Production code outside that wrapper may
+not instantiate `RandomNumberGenerator`; consumers acquire streams by their
+registered names and unknown names return no stream.
+
+Snapshot schema version 1 is JSON-safe and exact:
+
+```text
+schema_version
+root_seed: canonical signed decimal string
+streams:
+  combat|loot|dungeon:
+    name
+    seed: canonical signed decimal string
+    state: canonical signed decimal string
+```
+
+Restore requires exactly the registered streams and fields, validates derived
+seeds, and rejects the complete snapshot before mutation on any error. It sets
+each generator's seed before restoring its state and preserves already-acquired
+stream handles. Decimal strings avoid precision loss in JSON implementations
+that represent numbers with fewer than 64 integer bits.
+
 Determinism is guaranteed only within the same `simulation_version` and
-`content_version`.
+`content_version`. The derivation domain, names, snapshot shape, golden
+sequences, and underlying Godot RNG behavior are simulation compatibility
+contracts.
 
 ## 6. Stats and modifiers
 

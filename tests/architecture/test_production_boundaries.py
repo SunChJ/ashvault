@@ -21,6 +21,10 @@ PRODUCTION_REFERENCE = re.compile(r"(?:res://|(?:\.\./)+)game/")
 ROOT_REFERENCE = re.compile(
     r"(?:res://game/|(?:\.\./)+)(simulation|content|presentation|infrastructure)/"
 )
+GLOBAL_RANDOM_CALL = re.compile(
+    r"(?<![.\w])(?:randf|randf_range|randfn|randi|randi_range|randomize|seed)\s*\("
+)
+RNG_WRAPPER = PRODUCTION_ROOT / "simulation/random/deterministic_rng_stream.gd"
 FORBIDDEN_DEPENDENCIES = {
     "content": {"simulation", "presentation", "infrastructure"},
     "simulation": {"presentation", "infrastructure"},
@@ -93,6 +97,23 @@ class ProductionBoundaryTests(unittest.TestCase):
             violations,
             [],
             "Production roots must follow the documented dependency direction.",
+        )
+
+    def test_randomness_is_owned_by_the_deterministic_stream_wrapper(self) -> None:
+        violations: list[str] = []
+        for path in sorted(PRODUCTION_ROOT.rglob("*.gd")):
+            contents = path.read_text(encoding="utf-8")
+            if GLOBAL_RANDOM_CALL.search(contents):
+                violations.append(f"{path.relative_to(REPOSITORY_ROOT)}: global call")
+            if path != RNG_WRAPPER and "RandomNumberGenerator" in contents:
+                violations.append(
+                    f"{path.relative_to(REPOSITORY_ROOT)}: direct generator"
+                )
+
+        self.assertEqual(
+            violations,
+            [],
+            "Production randomness must flow through deterministic named streams.",
         )
 
 

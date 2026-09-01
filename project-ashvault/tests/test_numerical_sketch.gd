@@ -6,6 +6,10 @@ var failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	var sketch := SketchScene.instantiate()
 	root.add_child(sketch)
 	sketch.set_physics_process(false)
