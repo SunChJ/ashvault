@@ -8,19 +8,35 @@ var _is_frozen := false
 
 
 func register_tag(tag: String) -> String:
+	var errors := register_tags([tag])
+	return "" if errors.is_empty() else errors[0]
+
+
+func register_tags(tags: Array[String]) -> PackedStringArray:
+	var errors := PackedStringArray()
 	if _is_frozen:
-		return "Tag registry is frozen; cannot register '%s'." % tag
+		errors.append("Tag registry is frozen; cannot register tags.")
+		return errors
 
-	var validation_error := StableIdContract.validation_error(tag)
-	if not validation_error.is_empty():
-		return "Invalid tag '%s': %s" % [tag, validation_error]
+	var pending: Dictionary = {}
+	for tag in tags:
+		var validation_error := StableIdContract.validation_error(tag)
+		if not validation_error.is_empty():
+			errors.append("Invalid tag '%s': %s" % [tag, validation_error])
+			continue
 
-	var key := StringName(tag)
-	if _tags.has(key):
-		return "Tag '%s' is already registered." % tag
+		var key := StringName(tag)
+		if _tags.has(key) or pending.has(key):
+			errors.append("Tag '%s' is already registered." % tag)
+			continue
+		pending[key] = true
 
-	_tags[key] = true
-	return ""
+	if not errors.is_empty():
+		return errors
+
+	for key: StringName in pending:
+		_tags[key] = true
+	return errors
 
 
 func contains(tag: String) -> bool:

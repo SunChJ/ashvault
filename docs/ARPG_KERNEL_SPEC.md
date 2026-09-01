@@ -54,6 +54,10 @@ Tags use a validated registry and lowercase dotted names, such as
 `damage.lightning`, `delivery.projectile`, and `event.kill`. Unknown IDs or tags
 fail content validation before a run starts.
 
+Tag registration is atomic for a batch: any invalid or duplicate tag rejects
+the entire batch. The registry is frozen before a validated catalog is
+published, and later registration attempts fail rather than mutate live rules.
+
 The following versions are independent:
 
 - `content_version`: authored definition compatibility.
