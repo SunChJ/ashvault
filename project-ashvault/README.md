@@ -45,6 +45,11 @@ Production development is governed by the repository-level
 [`ARPG_KERNEL_SPEC.md`](../docs/ARPG_KERNEL_SPEC.md). Production code must not
 import the prototype as a gameplay dependency.
 
+Production source belongs under [`game/`](game/README.md), separated into
+simulation, content, presentation, and infrastructure roots. The current main
+scene intentionally remains the numerical prototype until the production
+composition root is ready.
+
 ## Validation
 
 ```bash
