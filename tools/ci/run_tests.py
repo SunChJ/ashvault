@@ -84,6 +84,7 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
                 "unittest",
                 "tests/architecture/test_production_boundaries.py",
                 "tests/tools/ci/test_run_tests.py",
+                "tests/tools/ci/test_workflow_contract.py",
                 "tests/tools/research/test_sync_hero_siege.py",
             ],
         ),
