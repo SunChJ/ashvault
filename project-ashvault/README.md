@@ -52,6 +52,15 @@ composition root is ready.
 
 ## Validation
 
+Run the complete local suite with the pinned Godot version:
+
+```bash
+python3 tools/ci/run_tests.py
+```
+
+The same runner executes on Windows and macOS CI. Individual numerical checks
+remain available for focused iteration:
+
 ```bash
 /Applications/Godot.app/Contents/MacOS/Godot \
   --headless --path project-ashvault \

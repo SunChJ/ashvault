@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-2022]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Download pinned Godot
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path .tools/godot | Out-Null
+          if ("${{ runner.os }}" -eq "macOS") {
+            $asset = "Godot_v${env:GODOT_VERSION}-stable_macos.universal.zip"
+          } else {
+            $asset = "Godot_v${env:GODOT_VERSION}-stable_win64.exe.zip"
+          }
+          $url = "https://github.com/godotengine/godot-builds/releases/download/${env:GODOT_VERSION}-stable/$asset"
+          Invoke-WebRequest -Uri $url -OutFile .tools/godot.zip
+          Expand-Archive -Path .tools/godot.zip -DestinationPath .tools/godot -Force
+
+          if ("${{ runner.os }}" -eq "macOS") {
+            $godot = (Resolve-Path ".tools/godot/Godot.app/Contents/MacOS/Godot").Path
+            & chmod +x $godot
+          } else {
+            $godot = (Resolve-Path ".tools/godot/Godot_v${env:GODOT_VERSION}-stable_win64.exe").Path
+          }
+          "ASHVAULT_GODOT=$godot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run validation suite
+        shell: pwsh
+        run: python tools/ci/run_tests.py --godot $env:ASHVAULT_GODOT
