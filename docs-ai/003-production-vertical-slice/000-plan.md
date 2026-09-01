@@ -105,3 +105,6 @@ ceiling.
 - Updated 2026-09-01: combat reactions expand through a deterministic FIFO
   event queue with bounded proc chains and explicit diagnostics — see
   [`007-combat-event-queue.md`](007-combat-event-queue.md).
+- Updated 2026-09-01: abilities use immutable effect graphs, validated rank
+  transforms, and transactional typed execution outputs — see
+  [`008-ability-effects.md`](008-ability-effects.md).
