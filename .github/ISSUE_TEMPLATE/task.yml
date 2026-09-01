@@ -1,0 +1,58 @@
+name: Development task
+description: Create an executable task governed by the Ashvault taskbook.
+title: "TASK-KEY — "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check `docs/DEVELOPMENT_TASKBOOK.md` and the relevant contract before filing.
+        Apply exactly one `type:*`, `area:*`, `priority:*`, and `size:*` label.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: State the observable result, not the implementation activity.
+    validations:
+      required: true
+  - type: textarea
+    id: in_scope
+    attributes:
+      label: In scope
+      description: Name the behavior and contracts this task owns.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Name adjacent behavior intentionally excluded.
+    validations:
+      required: true
+  - type: textarea
+    id: blocked_by
+    attributes:
+      label: Blocked by
+      description: Use real Issue references, or write None.
+      placeholder: "- #123"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Provide independently verifiable completion conditions.
+      placeholder: |-
+        - [ ] Observable result one
+        - [ ] Observable result two
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: List exact automated and runtime evidence required.
+      placeholder: |-
+        - [ ] Command or scenario
+        - [ ] Artifact or report
+    validations:
+      required: true

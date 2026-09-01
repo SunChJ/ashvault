@@ -1,0 +1,89 @@
+# 003 — Production Vertical Slice: Plan
+
+| | |
+| --- | --- |
+| **Status** | Planned |
+| **Anchor date** | 2026-09-01 |
+| **Primary refs** | [`DEVELOPMENT_TASKBOOK.md`](../../docs/DEVELOPMENT_TASKBOOK.md), [`ARPG_KERNEL_SPEC.md`](../../docs/ARPG_KERNEL_SPEC.md), GitHub Issues [#1](https://github.com/SunChJ/ashvault/issues/1)–[#48](https://github.com/SunChJ/ashvault/issues/48) |
+| **Related** | [`docs/DEVELOPMENT_TASKBOOK.md`](../../docs/DEVELOPMENT_TASKBOOK.md), [`docs/ARPG_KERNEL_SPEC.md`](../../docs/ARPG_KERNEL_SPEC.md), [`002`](../002-numerical-combat-sketch/000-plan.md) |
+
+## Background
+
+Ashvault has a verified numerical sketch and a local Hero Siege research model,
+but it does not yet have a production ARPG architecture. Extending the sketch
+directly would couple simulation, presentation, content, and lifecycle state in
+the same script and recreate the rule duplication identified during research.
+
+The first production deliverable is a persistent single-player ARPG vertical
+slice: Stormweaver prepares in a town, enters a seeded modular dungeon, defeats
+a boss, returns with loot, changes the build, and repeats the loop in 20–30
+minutes. The slice targets Windows and macOS and reserves authority boundaries
+without implementing multiplayer.
+
+## Goals
+
+- Establish a decision-complete development taskbook and mirrored GitHub Issues.
+- Define stable contracts for stats, combat, events, abilities, items, saves,
+  deterministic RNG, simulation commands, and presentation snapshots.
+- Build the production kernel independently from the numerical prototype.
+- Validate active combat, persistent progression, rarity diversity, modular
+  dungeons, combat feedback, and desktop performance in one playable loop.
+- Use milestone exit gates instead of calendar promises.
+
+### Non-goals
+
+- Four campaign acts, additional classes, seasons, trading, online economy,
+  multiplayer, gamepad, consoles, mobile, or final production art.
+- Compatibility between the numerical prototype and production APIs.
+- Redistribution or runtime use of third-party Hero Siege data.
+
+## Design / Approach
+
+Repository documentation is the design source of truth. GitHub Milestones and
+Issues mirror executable work and acceptance criteria; they do not replace the
+contracts. Work is sequenced through six gates:
+
+```text
+M0 Contracts -> M1 Kernel -> M2 Active Combat -----\
+                              M3 Items & Save ------> M4 Dungeon Loop -> M5 Slice Release
+```
+
+The production boundary is:
+
+```text
+Commands -> Simulation -> Events/Snapshots -> Presentation
+                 |
+                 +-> Versioned Save DTO
+```
+
+Godot Resources define immutable content. Runtime instances and save DTOs are
+not Resources that encode player ownership, and the SceneTree is never the save
+schema. All damage is resolved by one pipeline. Proc effects enter a bounded
+event queue. Named RNG streams make combat, loot, and dungeon generation
+replayable and independently evolvable.
+
+The slice proves item diversity with generated white, blue, and gold items;
+target-farmable green items; narrow purple interactions; rule-changing red
+uniques; and one partial-set experiment. High rarity is not a universal power
+ceiling.
+
+## Alternatives & decisions
+
+| Alternative | Decision |
+| --- | --- |
+| Extend the 704-line sketch | Rejected: it is intentionally disposable and combines simulation with rendering. |
+| Implement co-op in the slice | Rejected: command, UID, and RNG boundaries are sufficient authority preparation. |
+| Use a fixed dungeon | Rejected: modular authored rooms validate replayable content without full procedural-generation risk. |
+| Build a full public demo | Rejected: representative combat feedback matters now; final environment and character art do not. |
+| Track only in GitHub Issues | Rejected: protocol decisions and milestone gates need a durable repository source of truth. |
+| Estimate calendar dates | Rejected: dependencies and relative S/M/L complexity are more honest before kernel throughput is known. |
+
+## Validation
+
+- Every executable task has one milestone, type, priority, size, dependencies,
+  acceptance criteria, and validation instructions.
+- All GitHub dependency references resolve to existing Issues.
+- The taskbook, Kernel specification, milestone descriptions, and Issues agree.
+- Product implementation is not started until M0 contracts pass review.
+
+## Amendments
