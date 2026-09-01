@@ -43,6 +43,9 @@ class CiTestRunnerTests(unittest.TestCase):
                 "python-tests",
                 "production-identity-contracts",
                 "production-content-catalog",
+                "production-performance-metrics",
+                "performance-baseline",
+                "performance-report-schema",
                 "numerical-core",
                 "numerical-sketch",
                 "main-scene-smoke",
@@ -52,8 +55,29 @@ class CiTestRunnerTests(unittest.TestCase):
             "tests/tools/ci/test_workflow_contract.py",
             commands[0].arguments,
         )
-        for command in commands[1:]:
+        self.assertIn(
+            "tests/tools/performance/test_validate_report.py",
+            commands[0].arguments,
+        )
+        godot_commands = [
+            command for command in commands if command.arguments[0] == "/godot"
+        ]
+        for command in godot_commands:
             self.assertIn(str(repository_root / "project-ashvault"), command.arguments)
+
+        baseline = next(
+            command for command in commands if command.name == "performance-baseline"
+        )
+        validator = next(
+            command
+            for command in commands
+            if command.name == "performance-report-schema"
+        )
+        expected_report = str(
+            repository_root / ".artifacts" / "performance" / "ci-baseline.json"
+        )
+        self.assertEqual(baseline.arguments[-1], expected_report)
+        self.assertEqual(validator.arguments[-1], expected_report)
 
     def test_version_check_requires_the_pinned_release(self) -> None:
         successful_run = Mock(stdout="4.7.2.stable.official\n", returncode=0)

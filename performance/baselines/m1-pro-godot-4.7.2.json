@@ -1,0 +1,32 @@
+{
+	"benchmark_id": "synthetic.fixed_tick.v1",
+	"captured_at_utc": "2026-09-01T06:23:58Z",
+	"entity_count": {
+		"mean": 620.0,
+		"min": 620,
+		"peak": 620
+	},
+	"rendering_enabled": false,
+	"runtime": {
+		"godot_version": "4.7.2-stable (official)",
+		"model": "MacBookPro18,3",
+		"platform": "macOS",
+		"processor": "Apple M1 Pro"
+	},
+	"sample_count": 900,
+	"schema_version": 1,
+	"simulation_version": 1,
+	"tick_time_usec": {
+		"max": 989,
+		"mean": 85.6888888888889,
+		"p50": 82,
+		"p95": 92,
+		"p99": 184
+	},
+	"workload": {
+		"actors": 120,
+		"projectiles": 500,
+		"sample_ticks": 900,
+		"warmup_ticks": 120
+	}
+}

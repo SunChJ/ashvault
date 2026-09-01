@@ -287,6 +287,14 @@ depth, entity counts, and tick-time percentiles.
 Every damage result and generated item must be explainable by source IDs. Debug
 traces are opt-in so production-density tests do not pay their allocation cost.
 
+Performance reports use a versioned machine-readable contract with runtime and
+workload metadata, sample count, entity-count statistics, and nearest-rank P50,
+P95, and P99 tick times. The harness advances simulation directly under a
+headless `SceneTree`; loading or awaiting rendered frames is forbidden. The M0
+synthetic fixed-tick workload validates this reporting path and is replaced by
+the production headless combat simulation in M1 without changing the report
+contract.
+
 ## 13. Performance and compatibility targets
 
 The slice target is 1080p at 60 FPS with 120 live enemies and 500 projectiles.
