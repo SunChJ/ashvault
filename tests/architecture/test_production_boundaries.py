@@ -25,6 +25,7 @@ GLOBAL_RANDOM_CALL = re.compile(
     r"(?<![.\w])(?:randf|randf_range|randfn|randi|randi_range|randomize|seed)\s*\("
 )
 RNG_WRAPPER = PRODUCTION_ROOT / "simulation/random/deterministic_rng_stream.gd"
+ABILITY_EXECUTOR = PRODUCTION_ROOT / "simulation/abilities/ability_executor.gd"
 FORBIDDEN_DEPENDENCIES = {
     "content": {"simulation", "presentation", "infrastructure"},
     "simulation": {"presentation", "infrastructure"},
@@ -114,6 +115,20 @@ class ProductionBoundaryTests(unittest.TestCase):
             violations,
             [],
             "Production randomness must flow through deterministic named streams.",
+        )
+
+    def test_ability_execution_does_not_branch_on_item_ids(self) -> None:
+        contents = ABILITY_EXECUTOR.read_text(encoding="utf-8")
+
+        self.assertNotIn(
+            "item.",
+            contents,
+            "Ability execution must consume transforms and modifiers, not item IDs.",
+        )
+        self.assertNotIn(
+            "item_name",
+            contents,
+            "Ability execution must not branch on localized or authored item names.",
         )
 
 

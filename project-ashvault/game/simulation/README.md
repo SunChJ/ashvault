@@ -56,3 +56,18 @@ Root events start at depth zero. Depth eight is processable and depth nine is
 denied. A trigger cannot appear twice in one chain trace unless its definition
 explicitly allows self-reentry. Budget exhaustion fails the process result and
 retains pending events instead of silently dropping them.
+
+## Abilities and effects
+
+`abilities/AbilityDefinition` owns cost, cooldown, cast timing, targeting,
+delivery, an ordered effect DAG, and cumulative rank milestones. Effects use
+six explicit schemas: damage, status, movement, projectile, persistent entity,
+and event. Rank milestones replace stable effect IDs and every cumulative graph
+is validated before publication.
+
+`abilities/AbilityExecutor` is transactional and scene-independent. Damage
+outputs resolve immediately through `DamagePipeline`; event outputs are
+configured requests for `CombatEventQueue`; other effect kinds become typed
+simulation commands for later state owners. A failed effect publishes no
+partial outputs. Damage-type conversion modifiers enter only `DamageContext`
+and are consumed exactly once by the damage pipeline.
