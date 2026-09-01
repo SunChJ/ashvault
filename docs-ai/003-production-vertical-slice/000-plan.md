@@ -91,3 +91,5 @@ ceiling.
 - Updated 2026-09-01: executable Issues must be delivered through linked PRs
   rather than direct pushes and manual closure — see
   [`002-pr-linked-delivery.md`](002-pr-linked-delivery.md).
+- Updated 2026-09-01: the implemented M0 surface is compatibility-frozen before
+  M1 begins — see [`003-m0-contract-freeze.md`](003-m0-contract-freeze.md).

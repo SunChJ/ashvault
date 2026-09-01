@@ -18,6 +18,15 @@ REQUIRED_ROOTS = (
 SCANNED_SUFFIXES = {".cs", ".gd", ".gdshader", ".tres", ".tscn"}
 PROTOTYPE_REFERENCE = re.compile(r"(?:res://|(?:\.\./)+)prototype/")
 PRODUCTION_REFERENCE = re.compile(r"(?:res://|(?:\.\./)+)game/")
+ROOT_REFERENCE = re.compile(
+    r"(?:res://game/|(?:\.\./)+)(simulation|content|presentation|infrastructure)/"
+)
+FORBIDDEN_DEPENDENCIES = {
+    "content": {"simulation", "presentation", "infrastructure"},
+    "simulation": {"presentation", "infrastructure"},
+    "presentation": {"infrastructure"},
+    "infrastructure": set(),
+}
 
 
 class ProductionBoundaryTests(unittest.TestCase):
@@ -65,6 +74,25 @@ class ProductionBoundaryTests(unittest.TestCase):
             violations,
             [],
             "Prototype files must not become production integration surfaces.",
+        )
+
+    def test_production_root_dependencies_follow_ownership_direction(self) -> None:
+        violations: list[str] = []
+        for owner, forbidden_roots in FORBIDDEN_DEPENDENCIES.items():
+            for path in sorted((PRODUCTION_ROOT / owner).rglob("*")):
+                if not path.is_file() or path.suffix not in SCANNED_SUFFIXES:
+                    continue
+                contents = path.read_text(encoding="utf-8")
+                referenced_roots = set(ROOT_REFERENCE.findall(contents))
+                invalid_roots = sorted(referenced_roots & forbidden_roots)
+                if invalid_roots:
+                    relative_path = path.relative_to(REPOSITORY_ROOT)
+                    violations.append(f"{relative_path}: {', '.join(invalid_roots)}")
+
+        self.assertEqual(
+            violations,
+            [],
+            "Production roots must follow the documented dependency direction.",
         )
 
 

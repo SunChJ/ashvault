@@ -23,6 +23,13 @@ flowchart LR
     Infrastructure --> Presentation
 ```
 
+| Owner | May reference |
+| --- | --- |
+| `content/` | `content/` |
+| `simulation/` | `simulation/`, `content/` |
+| `presentation/` | `presentation/`, `simulation/`, `content/` |
+| `infrastructure/` | All production roots |
+
 - Production files must never load or preload anything under `res://prototype/`.
 - Simulation must not depend on scenes, presentation, input devices, or rendered
   frame timing.
@@ -31,6 +38,5 @@ flowchart LR
 - Content definitions are immutable after catalog validation.
 - Infrastructure composes the other roots without moving their responsibilities.
 
-Repository-level architecture tests enforce the prototype boundary. More
-specific root-to-root constraints are introduced with the contracts that need
-them rather than inferred from directory names alone.
+Repository-level architecture tests enforce both the prototype boundary and
+these root-to-root dependency directions.

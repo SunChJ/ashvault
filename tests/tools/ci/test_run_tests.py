@@ -41,6 +41,7 @@ class CiTestRunnerTests(unittest.TestCase):
             names,
             [
                 "python-tests",
+                "m0-contract-freeze",
                 "production-identity-contracts",
                 "production-content-catalog",
                 "production-performance-metrics",
@@ -53,6 +54,10 @@ class CiTestRunnerTests(unittest.TestCase):
         )
         self.assertIn(
             "tests/tools/ci/test_workflow_contract.py",
+            commands[0].arguments,
+        )
+        self.assertIn(
+            "tests/architecture/test_m0_contract_freeze.py",
             commands[0].arguments,
         )
         self.assertIn(

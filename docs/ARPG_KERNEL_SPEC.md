@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| **Status** | Accepted for M0 implementation |
-| **Version** | 0.1 |
+| **Status** | M0 contracts frozen |
+| **Version** | 1.0 |
 | **Runtime** | Godot 4.7.2 |
 | **Targets** | Windows and macOS |
 
@@ -16,6 +16,34 @@ experiment and is not a production API.
 The kernel must support long-lived ARPG content without duplicating rules in
 skills, items, enemies, UI, saves, or scenes. Simulation is deterministic for a
 fixed version, seed set, initial state, and command stream.
+
+## M0 contract freeze
+
+This specification contains both implemented foundations and normative design
+for later milestones. Their status is explicit:
+
+| Scope | Status |
+| --- | --- |
+| Sections 2–3 | Implemented and frozen in M0 |
+| M0 performance report contract in section 12 | Implemented and frozen in M0 |
+| Sections 4–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
+
+The frozen public surface is:
+
+| Contract | Authoritative implementation | Compatibility key |
+| --- | --- | --- |
+| Production roots and dependency direction | `project-ashvault/game/README.md` | Kernel specification version |
+| Stable IDs and registered tags | `project-ashvault/game/content/stable_id.gd`, `tag_registry.gd` | `content_version` |
+| Transactional immutable catalog publication | `project-ashvault/game/content/content_definition.gd`, `content_catalog.gd` | `content_version` |
+| Content, simulation, and save version fields | `project-ashvault/game/infrastructure/version_info.gd` | Individual version field |
+| Performance aggregation and report shape | `project-ashvault/game/infrastructure/performance_metrics.gd`, `performance/performance-report.schema.json` | Report `schema_version` |
+| Headless macOS and Windows validation entrypoint | `tools/ci/run_tests.py`, `.github/workflows/ci.yml` | CI workflow contract |
+
+Breaking changes to a frozen contract require its compatibility key to change,
+together with updated tests and an explicit migration or compatibility policy.
+Compatible additions may retain the current version. Downstream sections become
+implemented only through their taskbook gates; specification text alone is not
+an implementation claim.
 
 ## 2. Architectural boundary
 
