@@ -86,11 +86,17 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
                 "-m",
                 "unittest",
                 "tests/architecture/test_production_boundaries.py",
+                "tests/architecture/test_m0_contract_freeze.py",
                 "tests/tools/ci/test_run_tests.py",
                 "tests/tools/ci/test_workflow_contract.py",
                 "tests/tools/performance/test_validate_report.py",
                 "tests/tools/research/test_sync_hero_siege.py",
             ],
+        ),
+        TestCommand(
+            "m0-contract-freeze",
+            godot_base
+            + ["--script", "res://tests/production/test_m0_contract_freeze.gd"],
         ),
         TestCommand(
             "production-identity-contracts",
