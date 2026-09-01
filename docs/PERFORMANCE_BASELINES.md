@@ -74,10 +74,36 @@ python3 -m tools.simulation.validate_report /tmp/ashvault-simulation.json
 The CI suite writes its transient report to
 `.artifacts/performance/ci-baseline.json` and its combat replay report to
 `.artifacts/simulation/ci-report.json`. CI validates structure and invariants;
-it does not enforce timing thresholds because shared runners are not stable
-performance reference machines.
+the M1 kernel gate also enforces a generous 8,000 μs P95 smoke bound. Shared
+runners are not treated as stable performance reference machines.
 
-## Archived reference capture
+## M1 kernel gate
+
+[`kernel-gate-v1.json`](../performance/kernel-gate-v1.json) freezes the runtime
+versions, fixture identity, replay hashes, structural limits, and two timing
+bounds:
+
+| Scope | Workload | P95 bound | Meaning |
+| --- | --- | ---: | --- |
+| Portable CI smoke | 2 entities, 120 ticks | 8,000 μs | Detect catastrophic kernel regressions across heterogeneous runners. |
+| Apple M1 Pro reference | 2 entities, 120 ticks | 1,000 μs | Bound the named local reference profile with headroom over repeated captures. |
+
+The archived M1 Pro production capture records P50/P95/P99 of 19/567/772 μs
+and a maximum of 880 μs. Ten independent processes observed P95 values from 214
+to 567 μs; the most conservative capture was archived. Validate a fresh report
+against both the manifest and archived capture with:
+
+```sh
+python3 -m tools.performance.validate_kernel_gate \
+  performance/kernel-gate-v1.json \
+  /tmp/ashvault-simulation.json
+```
+
+This fixture is correctness-oriented and does not represent 120 enemies plus
+500 projectiles. M5-06 owns that density workload, Windows reference-profile
+capture, and the 30-minute soak gate.
+
+## Archived M0 bootstrap reference capture
 
 [`m1-pro-godot-4.7.2.json`](../performance/baselines/m1-pro-godot-4.7.2.json)
 is the initial local reference capture:

@@ -26,8 +26,9 @@ for later milestones. Their status is explicit:
 | --- | --- |
 | Sections 2–3 | Implemented and frozen in M0 |
 | M0 performance report contract in section 12 | Implemented and frozen in M0 |
-| Sections 4–9 | Implemented through M1-06 and compatibility-controlled |
-| Sections 10–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
+| Sections 4–9 | Implemented and gated in M1 |
+| Production simulator behavior in section 12 | Implemented and gated in M1 |
+| Sections 10–11 and representative-density targets in section 13 | Accepted for downstream implementation |
 
 The frozen public surface is:
 
@@ -40,6 +41,8 @@ The frozen public surface is:
 | Performance aggregation and report shape | `project-ashvault/game/infrastructure/performance_metrics.gd`, `performance/performance-report.schema.json` | Report `schema_version` |
 | Headless macOS and Windows validation entrypoint | `tools/ci/run_tests.py`, `.github/workflows/ci.yml` | CI workflow contract |
 | Fixed-tick entity commands and presentation snapshots | `project-ashvault/game/simulation/entities/entity_world.gd`, `commands/player_command.gd`, `snapshots/presentation_snapshot.gd` | `simulation_version` |
+| Deterministic headless combat replay | `project-ashvault/game/infrastructure/headless/headless_combat_simulation.gd`, `performance/simulation-report.schema.json` | `simulation_version` and report `schema_version` |
+| M1 kernel correctness and regression gate | `performance/kernel-gate-v1.json`, `performance/kernel-gate.schema.json` | Gate `schema_version` |
 
 Breaking changes to a frozen contract require its compatibility key to change,
 together with updated tests and an explicit migration or compatibility policy.
@@ -397,6 +400,11 @@ fixed-tick report remains frozen at schema version 1. The M1 production combat
 simulator publishes its deterministic replay and combat fields through the
 separate `simulation-report.schema.json` contract, while reusing the same
 `PerformanceMetrics` aggregation for observed tick measurements.
+
+M1 closes only when `kernel-gate-v1.json` accepts the current report and its
+archived Apple M1 Pro reference capture. The two-entity fixture has an 8 ms
+portable P95 smoke bound and a 1 ms M1 Pro P95 reference bound. These detect
+kernel regressions but do not satisfy the representative-density target below.
 
 ## 13. Performance and compatibility targets
 
