@@ -6,6 +6,10 @@ var failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	_test_report_percentiles_and_entity_counts()
 	_test_invalid_samples_are_rejected_atomically()
 	_test_empty_metrics_do_not_publish_a_report()

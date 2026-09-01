@@ -8,6 +8,10 @@ var failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	_test_stable_id_syntax()
 	_test_tag_registry()
 	_test_version_contract()

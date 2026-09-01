@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -45,6 +47,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-identity-contracts",
                 "production-content-catalog",
                 "production-performance-metrics",
+                "production-rng-streams",
                 "performance-baseline",
                 "performance-report-schema",
                 "numerical-core",
@@ -95,6 +98,47 @@ class CiTestRunnerTests(unittest.TestCase):
                 Path("/godot"),
                 runner=Mock(return_value=wrong_run),
             )
+
+    def test_script_entrypoints_defer_execution_for_reliable_exit_codes(self) -> None:
+        repository_root = Path(__file__).resolve().parents[3]
+        commands = run_tests.build_commands(Path("/godot"), repository_root)
+        script_resources = [
+            command.arguments[command.arguments.index("--script") + 1]
+            for command in commands
+            if "--script" in command.arguments
+        ]
+
+        for resource_path in script_resources:
+            with self.subTest(resource_path=resource_path):
+                script_path = (
+                    repository_root
+                    / "project-ashvault"
+                    / resource_path.removeprefix("res://")
+                )
+                contents = script_path.read_text(encoding="utf-8")
+                self.assertIn(
+                    'call_deferred("_run")',
+                    contents,
+                    "SceneTree scripts must leave _init before reporting exit codes.",
+                )
+
+    def test_godot_error_output_fails_even_when_process_status_is_zero(self) -> None:
+        completed = Mock(returncode=0, stdout="SCRIPT ERROR: Parse Error\n")
+        runner = Mock(return_value=completed)
+
+        with redirect_stdout(StringIO()):
+            exit_code = run_tests.run_all(
+                [
+                    run_tests.TestCommand(
+                        "broken-godot-script",
+                        ["/godot", "--headless", "--script", "res://broken.gd"],
+                    )
+                ],
+                Path("/repo"),
+                runner=runner,
+            )
+
+        self.assertEqual(exit_code, 1)
 
 
 if __name__ == "__main__":

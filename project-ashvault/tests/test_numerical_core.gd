@@ -7,6 +7,10 @@ var _failures: Array[String] = []
 
 
 func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	_test_damage_pipeline()
 	_test_critical_and_resistance_boundaries()
 	_test_haste_diminishing_returns()
