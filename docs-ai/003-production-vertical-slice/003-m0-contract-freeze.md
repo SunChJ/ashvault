@@ -58,5 +58,5 @@ tasks closed and the M0 milestone exited with no unresolved ownership or
 compatibility deviation. M1 production-kernel work is unblocked.
 
 M0-06 and its milestone were temporarily reopened only to deliver this
-post-merge state correction through the required PR workflow; no frozen
+post-merge state correction through the required workflow in PR #55; no frozen
 contract changed during finalization.
