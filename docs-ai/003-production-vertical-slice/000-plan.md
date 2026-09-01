@@ -114,3 +114,6 @@ ceiling.
 - Updated 2026-09-01: the production kernel is composed by a versioned headless
   combat CLI with deterministic replay and separate wall-clock observability —
   see [`010-headless-combat-replay.md`](010-headless-combat-replay.md).
+- Updated 2026-09-01: M1 closes through a machine-readable correctness,
+  determinism, architecture, and reference-performance gate — see
+  [`011-m1-kernel-gate.md`](011-m1-kernel-gate.md).

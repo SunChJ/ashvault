@@ -145,6 +145,28 @@ class ProductionBoundaryTests(unittest.TestCase):
             "Production simulation state must remain scene-independent.",
         )
 
+    def test_simulation_has_no_scene_or_rendered_frame_dependency(self) -> None:
+        forbidden_tokens = (
+            "SceneTree",
+            "get_tree(",
+            ".tscn",
+            "process_frame",
+            "physics_frame",
+        )
+        violations: list[str] = []
+        for path in sorted((PRODUCTION_ROOT / "simulation").rglob("*.gd")):
+            contents = path.read_text(encoding="utf-8")
+            observed = [token for token in forbidden_tokens if token in contents]
+            if observed:
+                relative_path = path.relative_to(REPOSITORY_ROOT)
+                violations.append(f"{relative_path}: {', '.join(observed)}")
+
+        self.assertEqual(
+            violations,
+            [],
+            "Production simulation must not import gameplay scenes or frame lifecycle.",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

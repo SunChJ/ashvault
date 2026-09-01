@@ -1,0 +1,60 @@
+{
+	"benchmark_id": "combat.headless.v1",
+	"captured_at_utc": "2026-09-01T09:46:29Z",
+	"combat": {
+		"critical_hits": 2,
+		"critical_rate": 0.181818181818182,
+		"damage_dealt": 260.0,
+		"damage_mix": {
+			"damage.lightning": 260.0
+		},
+		"damage_taken": 59.0,
+		"dps": 130.0,
+		"events_processed": 22,
+		"hits": 11,
+		"kills": 1,
+		"kills_per_second": 0.5,
+		"max_event_depth": 1,
+		"proc_events": 11,
+		"proc_rate": 1.0
+	},
+	"content_version": 1,
+	"inputs": {
+		"build_id": "build.fixture.stormweaver",
+		"command_count": 17,
+		"duration_seconds": 2.0,
+		"duration_ticks": 120,
+		"encounter_id": "encounter.fixture.training_ground",
+		"root_seed": "424242"
+	},
+	"rendering_enabled": false,
+	"replay": {
+		"final_tick": 120,
+		"report_hash": "d8e0ef3d3b1791c45f3d9366f67ac40c49864c76d24008f683b35207319dea64",
+		"state_hash": "650d204d9ae61efcab7c731456e66db45968ba61f2af16e0b0d3494a24aea6f8"
+	},
+	"runtime": {
+		"godot_version": "4.7.2-stable (official)",
+		"model": "MacBookPro18,3",
+		"platform": "macOS",
+		"processor": "Apple M1 Pro"
+	},
+	"schema_version": 1,
+	"simulation_version": 1,
+	"ticks": {
+		"commands_accepted": 17,
+		"entity_count": {
+			"mean": 2.0,
+			"min": 2,
+			"peak": 2
+		},
+		"sample_count": 120,
+		"tick_time_usec": {
+			"max": 880,
+			"mean": 80.725,
+			"p50": 19,
+			"p95": 567,
+			"p99": 772
+		}
+	}
+}

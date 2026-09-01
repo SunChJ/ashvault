@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "gate_id": "m1.kernel.v1",
+  "runtime": {
+    "godot_version": "4.7.2",
+    "simulation_version": 1,
+    "content_version": 1,
+    "fixed_ticks_per_second": 60
+  },
+  "replay": {
+    "benchmark_id": "combat.headless.v1",
+    "build_id": "build.fixture.stormweaver",
+    "encounter_id": "encounter.fixture.training_ground",
+    "root_seed": "424242",
+    "duration_ticks": 120,
+    "command_count": 17,
+    "expected_state_hash": "650d204d9ae61efcab7c731456e66db45968ba61f2af16e0b0d3494a24aea6f8",
+    "expected_report_hash": "d8e0ef3d3b1791c45f3d9366f67ac40c49864c76d24008f683b35207319dea64"
+  },
+  "thresholds": {
+    "portable_tick_p95_usec": 8000,
+    "apple_m1_pro_tick_p95_usec": 1000,
+    "max_event_depth": 1,
+    "peak_entity_count": 2
+  },
+  "reference_capture": {
+    "profile_id": "apple.m1_pro.16gb",
+    "report_path": "performance/baselines/m1-kernel-m1-pro-godot-4.7.2.json",
+    "platform": "macOS",
+    "processor": "Apple M1 Pro",
+    "model": "MacBookPro18,3"
+  }
+}

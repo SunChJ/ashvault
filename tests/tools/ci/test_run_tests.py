@@ -56,6 +56,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-headless-simulation",
                 "headless-simulation-cli",
                 "simulation-report-schema",
+                "m1-kernel-gate",
                 "performance-baseline",
                 "performance-report-schema",
                 "numerical-core",
@@ -105,6 +106,14 @@ class CiTestRunnerTests(unittest.TestCase):
         )
         self.assertEqual(simulation_cli.arguments[-1], expected_simulation_report)
         self.assertEqual(simulation_validator.arguments[-1], expected_simulation_report)
+        kernel_gate = next(
+            command for command in commands if command.name == "m1-kernel-gate"
+        )
+        self.assertEqual(
+            kernel_gate.arguments[-2],
+            str(repository_root / "performance" / "kernel-gate-v1.json"),
+        )
+        self.assertEqual(kernel_gate.arguments[-1], expected_simulation_report)
 
     def test_version_check_requires_the_pinned_release(self) -> None:
         successful_run = Mock(stdout="4.7.2.stable.official\n", returncode=0)
