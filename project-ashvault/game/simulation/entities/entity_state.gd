@@ -185,6 +185,15 @@ func _apply_damage_result(result: RefCounted) -> String:
 	return ""
 
 
+func _apply_position(value: Vector2) -> String:
+	if not _is_configured:
+		return "Entity position cannot change before configuration."
+	if not value.is_finite():
+		return "Entity position must be finite."
+	_position = value
+	return ""
+
+
 func _duplicate_state() -> RefCounted:
 	var result: RefCounted = get_script().new()
 	result._publish(

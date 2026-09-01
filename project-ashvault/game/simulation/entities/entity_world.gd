@@ -5,25 +5,37 @@ const PlayerCommandContract = preload("res://game/simulation/commands/player_com
 const CommandResult = preload("res://game/simulation/commands/command_batch_result.gd")
 const DamageResultContract = preload("res://game/simulation/combat/damage_result.gd")
 const EntityStateContract = preload("res://game/simulation/entities/entity_state.gd")
+const MovementEnvironmentContract = preload("res://game/simulation/movement/movement_environment.gd")
 const EntitySnapshot = preload("res://game/simulation/snapshots/presentation_entity_snapshot.gd")
 const Snapshot = preload("res://game/simulation/snapshots/presentation_snapshot.gd")
 
 const FIXED_TICKS_PER_SECOND := 60
 const FIXED_DELTA_SECONDS := 1.0 / float(FIXED_TICKS_PER_SECOND)
 const STATE_HASH_SCHEMA_VERSION := 1
+const MOVEMENT_STATE_HASH_SCHEMA_VERSION := 2
 
 var _tick := -1
 var _entities: Dictionary = {}
 var _last_client_sequences: Dictionary = {}
+var _movement_environment: RefCounted = null
 var _state_hash := ""
 var _is_configured := false
 
 
-func configure(initial_entities: Array, initial_tick: int = 0) -> String:
+func configure(
+	initial_entities: Array,
+	initial_tick: int = 0,
+	movement_environment: Variant = null
+) -> String:
 	if _is_configured:
 		return "Entity world is already configured."
 	if initial_tick < 0:
 		return "Entity world initial tick must be non-negative."
+	if movement_environment != null and (
+		not movement_environment is MovementEnvironmentContract
+		or not movement_environment.is_configured()
+	):
+		return "Entity world movement environment must be a configured MovementEnvironment."
 	var staged_entities: Dictionary = {}
 	for value: Variant in initial_entities:
 		if not value is EntityStateContract or not value.is_configured():
@@ -31,9 +43,16 @@ func configure(initial_entities: Array, initial_tick: int = 0) -> String:
 		var runtime_id: int = value.runtime_id()
 		if staged_entities.has(runtime_id):
 			return "Duplicate runtime entity ID %d." % runtime_id
+		if movement_environment != null:
+			var placement_error: String = movement_environment.placement_error(value.position())
+			if not placement_error.is_empty():
+				return "Entity %d has invalid movement placement: %s" % [runtime_id, placement_error]
 		staged_entities[runtime_id] = value._duplicate_state()
 	_tick = initial_tick
 	_entities = staged_entities
+	_movement_environment = (
+		movement_environment._duplicate_value() if movement_environment != null else null
+	)
 	for runtime_id: int in _sorted_entity_ids():
 		if _entities[runtime_id].is_player_controlled():
 			_last_client_sequences[runtime_id] = 0
@@ -162,6 +181,31 @@ func advance_tick(commands: Array, damage_results: Array = []) -> RefCounted:
 			)
 		staged_sequences[command.actor_id()] = command.client_sequence()
 
+	if _movement_environment != null:
+		for runtime_id: int in _sorted_ids(staged_entities):
+			var moving_entity: RefCounted = staged_entities[runtime_id]
+			if (
+				not moving_entity.is_player_controlled()
+				or not moving_entity.is_alive()
+				or moving_entity.movement_input().is_zero_approx()
+			):
+				continue
+			var movement_result: Dictionary = _movement_environment.resolve_position(
+				moving_entity.position(),
+				moving_entity.movement_input(),
+				FIXED_DELTA_SECONDS
+			)
+			var movement_error: String = movement_result.get("error", "")
+			if not movement_error.is_empty():
+				return _rejected_movement(expected_tick, runtime_id, movement_error)
+			if not staged_copies.has(runtime_id):
+				moving_entity = moving_entity._duplicate_state()
+				staged_entities[runtime_id] = moving_entity
+				staged_copies[runtime_id] = true
+			var position_error: String = moving_entity._apply_position(movement_result["position"])
+			if not position_error.is_empty():
+				return _rejected_movement(expected_tick, runtime_id, position_error)
+
 	for damage_result: RefCounted in damage_results:
 		if not staged_entities.has(damage_result.target_entity_id()):
 			return _rejected_damage(
@@ -213,13 +257,24 @@ func _compute_state_hash() -> String:
 	sequence_ids.sort()
 	for runtime_id: int in sequence_ids:
 		sequence_values.append([runtime_id, _last_client_sequences[runtime_id]])
-	var canonical := [
-		STATE_HASH_SCHEMA_VERSION,
-		FIXED_TICKS_PER_SECOND,
-		_tick,
-		entity_values,
-		sequence_values,
-	]
+	var canonical: Array
+	if _movement_environment == null:
+		canonical = [
+			STATE_HASH_SCHEMA_VERSION,
+			FIXED_TICKS_PER_SECOND,
+			_tick,
+			entity_values,
+			sequence_values,
+		]
+	else:
+		canonical = [
+			MOVEMENT_STATE_HASH_SCHEMA_VERSION,
+			FIXED_TICKS_PER_SECOND,
+			_tick,
+			_movement_environment.canonical_values(),
+			entity_values,
+			sequence_values,
+		]
 	var context := HashingContext.new()
 	var start_error := context.start(HashingContext.HASH_SHA256)
 	assert(start_error == OK, "SHA-256 hashing must be available.")
@@ -294,6 +349,21 @@ func _rejected_damage(
 			"source_entity_id": source_entity_id,
 			"target_entity_id": target_entity_id,
 			"origin_event_id": origin_event_id,
+			"message": message,
+		}]
+	)
+
+
+func _rejected_movement(tick_value: int, actor_id: int, message: String) -> RefCounted:
+	return _result(
+		tick_value,
+		false,
+		0,
+		[{
+			"code": "movement.invalid_state",
+			"tick": tick_value,
+			"actor_id": actor_id,
+			"client_sequence": _last_client_sequences.get(actor_id, 0),
 			"message": message,
 		}]
 	)

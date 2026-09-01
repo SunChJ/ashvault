@@ -148,6 +148,8 @@ class ProductionBoundaryTests(unittest.TestCase):
     def test_simulation_has_no_scene_or_rendered_frame_dependency(self) -> None:
         forbidden_tokens = (
             "SceneTree",
+            "Input.",
+            "InputMap",
             "get_tree(",
             ".tscn",
             "process_frame",

@@ -80,8 +80,15 @@ copy-on-write staging, orders work by actor ID and client sequence, and commits
 the entire tick only when every transition is valid. Rejection leaves tick,
 entity state, and sequence state unchanged.
 
+`movement/MovementEnvironment` owns optional arena bounds, static rectangular
+obstacles, actor radius, and speed. It integrates living player movement once
+per accepted 60 Hz tick using continuous X-then-Y axis sweeps. Inflated
+obstacles prevent tunneling and allow deterministic wall sliding without scenes
+or a physics server.
+
 `snapshots/PresentationSnapshot` publishes runtime-ID-sorted immutable entity
 views. Its SHA-256 state hash uses a versioned canonical array schema and is
-identical whether presentation snapshots are requested or disabled. Movement
-and cast commands represent player intent here; M2 systems own spatial
-integration, cooldowns, costs, and effect commitment.
+identical whether presentation snapshots are requested or disabled. Worlds
+without movement retain the M1 hash schema; movement-enabled worlds include the
+canonical collision configuration in schema version 2. Cast commands remain
+intent until their owning M2 system commits timing, costs, and effects.
