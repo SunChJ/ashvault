@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "user_agent": "AshvaultResearch/0.1 (private local game-design research; github.com/SunChJ/ashvault)",
+  "request_delay_seconds": 0.2,
+  "hs_map": {
+    "id": "hs-map",
+    "repository_url": "https://github.com/Parazeya/hs-map.git",
+    "license_status": "No license declared; keep the clone and derived snapshots outside Git."
+  },
+  "mistersleepycat": {
+    "id": "mistersleepycat",
+    "base_url": "https://mistersleepycat.info/",
+    "robots_url": "https://mistersleepycat.info/robots.txt",
+    "sitemap_url": "https://mistersleepycat.info/sitemap.xml",
+    "page_urls": [
+      "https://mistersleepycat.info/map",
+      "https://mistersleepycat.info/map/codex"
+    ],
+    "license_status": "Public fan-guide content; no reuse license observed. Keep raw and normalized snapshots outside Git."
+  },
+  "hero_siege_helper": {
+    "id": "hero-siege-helper",
+    "base_url": "https://hero-siege-helper.vercel.app/",
+    "robots_url": "https://hero-siege-helper.vercel.app/robots.txt",
+    "sitemap_url": "https://hero-siege-helper.vercel.app/sitemap.xml",
+    "page_paths": [
+      "tools",
+      "data/affixes",
+      "data/statlist",
+      "data/augments",
+      "data/itemlist",
+      "data/bases",
+      "data/subskills",
+      "data/crystal",
+      "data/diceeffects",
+      "data/maledict",
+      "data/gamba",
+      "data/triggers",
+      "items",
+      "items/gearprogression",
+      "items/sets",
+      "relics",
+      "augments",
+      "runewords",
+      "runes",
+      "subskills",
+      "abilities",
+      "keys",
+      "dungeons",
+      "codex",
+      "bosses",
+      "seasons",
+      "tree",
+      "ether",
+      "damage",
+      "tarot",
+      "exp"
+    ],
+    "license_status": "Public community reference; no source repository or reuse license identified. Keep snapshots outside Git."
+  },
+  "hero_siege_wiki": {
+    "id": "hero-siege-wiki",
+    "cargo_endpoints": [
+      {
+        "id": "items",
+        "url": "https://herosiege.wiki.gg/index.php?title=Special:CargoExport&tables=items&fields=_pageName%3DPage%2CItem_Name%3DItem%20Name%2CItem_Type%3DItem%20Type%2CItem_Rarity%3DItem%20Rarity%2CItem_Lore%3DItem%20Lore%2CItem_Level_Requirement%3DItem%20Level%20Requirement%2CItem_Tier%3DItem%20Tier%2CItem_Weapon_Class%3DItem%20Weapon%20Class%2CItem_Restricted_Drop%3DItem%20Restricted%20Drop%2CItem_Craftable%3DItem%20Craftable%2CItem_Set%3DItem%20Set%2CItem_Hidden%3DItem%20Hidden&limit=2000&format=json"
+      },
+      {
+        "id": "item-stats",
+        "url": "https://herosiege.wiki.gg/index.php?title=Special:CargoExport&tables=item_stats&fields=_pageName%3DPage%2CItem_Name%3DItem%20Name%2CStat_ID%3DStat%20ID%2CMin_Value1%3DMin%20Value1%2CMax_Value1%3DMax%20Value1%2CMin_Value2%3DMin%20Value2%2CMax_Value2%3DMax%20Value2%2CMin_Value3%3DMin%20Value3%2CMax_Value3%3DMax%20Value3%2CSpell_Name%3DSpell%20Name%2CClass_Name%3DClass%20Name%2CStat_Order%3DStat%20Order&limit=8000&format=json"
+      },
+      {
+        "id": "stat-format",
+        "url": "https://herosiege.wiki.gg/index.php?title=Special:CargoExport&tables=stat_format&fields=_pageName%3DPage%2CStat_ID%3DStat%20ID%2CStat_Type%3DStat%20Type%2CStat_Display%3DStat%20Display%2CStat_Color%3DStat%20Color&limit=300&format=json"
+      }
+    ],
+    "license_status": "Community wiki data; preserve attribution and keep snapshots outside Git pending a dedicated licensing review."
+  }
+}

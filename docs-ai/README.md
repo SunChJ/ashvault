@@ -34,3 +34,5 @@ writing, amendment, and verification rules.
 
 | ID | Topic | Anchor date | Summary |
 | --- | --- | --- | --- |
+| [001](001-hero-siege-reference-data/000-plan.md) | Hero Siege reference data | 2026-09-01 | Reproducible, provenance-aware local research snapshots without vendoring third-party content. |
+| [002](002-numerical-combat-sketch/000-plan.md) | Numerical combat sketch | 2026-09-01 | Playable damage, experience, skill-growth, density, and power-spike prototype. |
