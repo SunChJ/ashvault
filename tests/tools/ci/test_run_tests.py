@@ -49,6 +49,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-performance-metrics",
                 "production-rng-streams",
                 "production-stats",
+                "production-damage-pipeline",
                 "performance-baseline",
                 "performance-report-schema",
                 "numerical-core",

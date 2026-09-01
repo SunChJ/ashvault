@@ -99,3 +99,6 @@ ceiling.
 - Updated 2026-09-01: stats resolve through a registered seven-stage pipeline
   into immutable, explainable tick snapshots — see
   [`005-stat-resolution.md`](005-stat-resolution.md).
+- Updated 2026-09-01: all hit damage resolves through one immutable staged
+  context/result contract with single-point health rounding — see
+  [`006-damage-pipeline.md`](006-damage-pipeline.md).
