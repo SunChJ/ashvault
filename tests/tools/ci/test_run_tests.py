@@ -47,6 +47,10 @@ class CiTestRunnerTests(unittest.TestCase):
                 "main-scene-smoke",
             ],
         )
+        self.assertIn(
+            "tests/tools/ci/test_workflow_contract.py",
+            commands[0].arguments,
+        )
         for command in commands[1:]:
             self.assertIn(str(repository_root / "project-ashvault"), command.arguments)
 
