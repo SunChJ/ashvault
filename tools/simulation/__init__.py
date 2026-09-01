@@ -1,0 +1,1 @@
+"""Headless combat simulation tooling."""

@@ -3,6 +3,7 @@ extends RefCounted
 
 const StableIdContract = preload("res://game/content/stable_id.gd")
 const PlayerCommandContract = preload("res://game/simulation/commands/player_command.gd")
+const DamageResultContract = preload("res://game/simulation/combat/damage_result.gd")
 
 const CAST_IDLE := "cast.idle"
 const CAST_STARTED := "cast.started"
@@ -146,6 +147,8 @@ func _requires_tick_transition() -> bool:
 func _apply_command(command: RefCounted) -> String:
 	if not _is_configured or not command is PlayerCommandContract or not command.is_configured():
 		return "Entity cannot apply an invalid player command."
+	if not is_alive():
+		return "Dead entities cannot execute player commands."
 	match command.command_type():
 		PlayerCommandContract.MOVE:
 			_movement_input = command.aim_vector()
@@ -170,6 +173,15 @@ func _apply_command(command: RefCounted) -> String:
 			_cast_phase = CAST_CANCELED
 		_:
 			return "Entity received an unknown player command."
+	return ""
+
+
+func _apply_damage_result(result: RefCounted) -> String:
+	if not result is DamageResultContract or not result.is_configured():
+		return "Entity cannot apply an invalid DamageResult."
+	if result.target_entity_id() != _runtime_id:
+		return "Damage result target does not match runtime entity %d." % _runtime_id
+	_health = maxi(0, _health - result.committed_amount())
 	return ""
 
 

@@ -73,3 +73,8 @@ remain available for focused iteration:
 
 The second command runs a seeded three-minute balance sample and checks
 upgrade, Overdrive, boss, milestone, kill-cadence, and density bands.
+
+The production kernel can also run as a deterministic combat replay without a
+rendered scene. See
+[`PERFORMANCE_BASELINES.md`](../docs/PERFORMANCE_BASELINES.md#production-combat-replay)
+for the explicit fixture CLI and report contract.

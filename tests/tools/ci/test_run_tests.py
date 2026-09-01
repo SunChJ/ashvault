@@ -53,6 +53,9 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-combat-events",
                 "production-abilities",
                 "production-entity-commands",
+                "production-headless-simulation",
+                "headless-simulation-cli",
+                "simulation-report-schema",
                 "performance-baseline",
                 "performance-report-schema",
                 "numerical-core",
@@ -91,6 +94,17 @@ class CiTestRunnerTests(unittest.TestCase):
         )
         self.assertEqual(baseline.arguments[-1], expected_report)
         self.assertEqual(validator.arguments[-1], expected_report)
+        simulation_cli = next(
+            command for command in commands if command.name == "headless-simulation-cli"
+        )
+        simulation_validator = next(
+            command for command in commands if command.name == "simulation-report-schema"
+        )
+        expected_simulation_report = str(
+            repository_root / ".artifacts" / "simulation" / "ci-report.json"
+        )
+        self.assertEqual(simulation_cli.arguments[-1], expected_simulation_report)
+        self.assertEqual(simulation_validator.arguments[-1], expected_simulation_report)
 
     def test_version_check_requires_the_pinned_release(self) -> None:
         successful_run = Mock(stdout="4.7.2.stable.official\n", returncode=0)

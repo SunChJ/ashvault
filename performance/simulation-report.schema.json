@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SunChJ/ashvault/blob/main/performance/simulation-report.schema.json",
+  "title": "Ashvault Headless Combat Simulation Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "benchmark_id", "captured_at_utc", "simulation_version", "content_version", "rendering_enabled", "runtime", "inputs", "replay", "combat", "ticks"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "benchmark_id": {"const": "combat.headless.v1"},
+    "captured_at_utc": {"type": "string", "format": "date-time"},
+    "simulation_version": {"type": "integer", "minimum": 1},
+    "content_version": {"type": "integer", "minimum": 1},
+    "rendering_enabled": {"const": false},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["godot_version", "platform", "processor", "model"],
+      "properties": {
+        "godot_version": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "processor": {"type": "string"},
+        "model": {"type": "string"}
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["build_id", "encounter_id", "root_seed", "duration_ticks", "duration_seconds", "command_count"],
+      "properties": {
+        "build_id": {"type": "string", "minLength": 1},
+        "encounter_id": {"type": "string", "minLength": 1},
+        "root_seed": {"type": "string", "pattern": "^-?(0|[1-9][0-9]*)$"},
+        "duration_ticks": {"type": "integer", "minimum": 1},
+        "duration_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "command_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_hash", "report_hash", "final_tick"],
+      "properties": {
+        "state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "report_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "final_tick": {"type": "integer", "minimum": 1}
+      }
+    },
+    "combat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["damage_dealt", "damage_taken", "dps", "damage_mix", "hits", "critical_hits", "critical_rate", "proc_events", "proc_rate", "kills", "kills_per_second", "events_processed", "max_event_depth"],
+      "properties": {
+        "damage_dealt": {"type": "number", "minimum": 0},
+        "damage_taken": {"type": "number", "minimum": 0},
+        "dps": {"type": "number", "minimum": 0},
+        "damage_mix": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+        "hits": {"type": "integer", "minimum": 0},
+        "critical_hits": {"type": "integer", "minimum": 0},
+        "critical_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "proc_events": {"type": "integer", "minimum": 0},
+        "proc_rate": {"type": "number", "minimum": 0},
+        "kills": {"type": "integer", "minimum": 0},
+        "kills_per_second": {"type": "number", "minimum": 0},
+        "events_processed": {"type": "integer", "minimum": 0},
+        "max_event_depth": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ticks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_count", "commands_accepted", "tick_time_usec", "entity_count"],
+      "properties": {
+        "sample_count": {"type": "integer", "minimum": 1},
+        "commands_accepted": {"type": "integer", "minimum": 0},
+        "tick_time_usec": {"type": "object", "additionalProperties": false, "required": ["mean", "p50", "p95", "p99", "max"], "properties": {"mean": {"type": "number", "minimum": 0}, "p50": {"type": "integer", "minimum": 0}, "p95": {"type": "integer", "minimum": 0}, "p99": {"type": "integer", "minimum": 0}, "max": {"type": "integer", "minimum": 0}}},
+        "entity_count": {"type": "object", "additionalProperties": false, "required": ["min", "mean", "peak"], "properties": {"min": {"type": "integer", "minimum": 0}, "mean": {"type": "number", "minimum": 0}, "peak": {"type": "integer", "minimum": 0}}}
+      }
+    }
+  }
+}
