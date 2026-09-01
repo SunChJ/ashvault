@@ -23,10 +23,18 @@ ticks directly from a headless `SceneTree`; it does not load a scene, await a
 rendered frame, or call presentation code.
 
 This workload validates the measurement pipeline and provides an early
-regression anchor. It is not evidence that the future production combat
-simulation meets the 8 ms P95 slice target. M1 replaces the synthetic step with
-the deterministic headless combat simulator while preserving this report
-contract.
+regression anchor. It is not evidence that production combat meets the 8 ms P95
+slice target. Its schema remains frozen; production combat uses the separate
+simulation report contract below.
+
+## Production combat replay
+
+`combat.headless.v1` composes the production RNG, stats, ability, damage,
+combat-event, command, and entity-state modules. Its report conforms to
+[`simulation-report.schema.json`](../performance/simulation-report.schema.json)
+and separates deterministic input/combat/replay fields from capture time,
+runtime identity, and measured tick duration. Identical explicit inputs produce
+the same state and report hashes on every supported platform.
 
 ## Commands
 
@@ -48,8 +56,24 @@ Capture and validate an individual report:
 python3 -m tools.performance.validate_report /tmp/ashvault-performance.json
 ```
 
+Run and validate the production combat replay:
+
+```sh
+python3 -m tools.simulation.run_headless \
+  --build project-ashvault/tests/fixtures/headless_build.json \
+  --encounter project-ashvault/tests/fixtures/headless_encounter.json \
+  --replay project-ashvault/tests/fixtures/headless_replay.json \
+  --root-seed 424242 \
+  --simulation-version 1 \
+  --content-version 1 \
+  --duration-seconds 2 \
+  --output /tmp/ashvault-simulation.json
+python3 -m tools.simulation.validate_report /tmp/ashvault-simulation.json
+```
+
 The CI suite writes its transient report to
-`.artifacts/performance/ci-baseline.json`. CI validates structure and invariants;
+`.artifacts/performance/ci-baseline.json` and its combat replay report to
+`.artifacts/simulation/ci-report.json`. CI validates structure and invariants;
 it does not enforce timing thresholds because shared runners are not stable
 performance reference machines.
 

@@ -3,6 +3,7 @@ extends SceneTree
 const EntityState = preload("res://game/simulation/entities/entity_state.gd")
 const EntityWorld = preload("res://game/simulation/entities/entity_world.gd")
 const PlayerCommand = preload("res://game/simulation/commands/player_command.gd")
+const DamageResult = preload("res://game/simulation/combat/damage_result.gd")
 
 const FIXTURE_PATH := "res://tests/fixtures/entity_command_replay.json"
 const EXPECTED_FINAL_HASH := "93bc6abe5dda72e9e2ff6e8c634ddba37bb99177030d0703eb752a036d3ca274"
@@ -151,6 +152,14 @@ func _test_rejections_are_atomic() -> void:
 		_command(2, 1, "command.aim", Vector2.UP, -1, 2),
 	])
 	_assert_true(retry.is_success(), "Rejected batch consumed an earlier valid sequence.")
+	var hash_before_damage: String = world.state_hash()
+	var invalid_damage: RefCounted = world.advance_tick(
+		[_command(3, 1, "command.move", Vector2.LEFT, -1, 3)],
+		[DamageResult.new()]
+	)
+	_assert_rejected(invalid_damage, "damage.invalid_result", "Invalid damage was accepted.")
+	_assert_equal(world.tick(), 2, "Rejected damage advanced the fixed tick.")
+	_assert_equal(world.state_hash(), hash_before_damage, "Rejected damage mutated world state.")
 
 	var duplicate: RefCounted = world.advance_tick([
 		_command(3, 1, "command.move", Vector2.LEFT, -1, 2),

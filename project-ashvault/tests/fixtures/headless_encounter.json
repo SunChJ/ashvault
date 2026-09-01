@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "encounter_id": "encounter.fixture.training_ground",
+  "target": {
+    "runtime_id": 2,
+    "definition_id": "entity.enemy.training_dummy",
+    "position": [10.0, 0.0],
+    "health": 260,
+    "max_health": 260,
+    "resource": 0.0,
+    "max_resource": 0.0
+  },
+  "attack": {
+    "ability_id": "ability.fixture.enemy_strike",
+    "damage_type_id": "damage.physical",
+    "base_damage": 8.0,
+    "power": 20.0,
+    "power_coefficient": 0.4,
+    "critical_chance": 0.1,
+    "critical_multiplier": 1.5,
+    "interval_ticks": 20
+  },
+  "mitigation": {
+    "defense": 20.0,
+    "resistance": 0.2
+  }
+}

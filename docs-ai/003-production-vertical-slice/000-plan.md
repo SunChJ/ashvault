@@ -111,3 +111,6 @@ ceiling.
 - Updated 2026-09-01: runtime entities advance through atomic fixed-tick
   command batches and publish immutable presentation snapshots — see
   [`009-entity-command-snapshots.md`](009-entity-command-snapshots.md).
+- Updated 2026-09-01: the production kernel is composed by a versioned headless
+  combat CLI with deterministic replay and separate wall-clock observability —
+  see [`010-headless-combat-replay.md`](010-headless-combat-replay.md).

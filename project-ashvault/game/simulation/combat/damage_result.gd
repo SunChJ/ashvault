@@ -63,6 +63,10 @@ func contributing_source_ids() -> PackedStringArray:
 	return _contributing_source_ids.duplicate()
 
 
+func is_configured() -> bool:
+	return _is_configured
+
+
 func _configure(
 	context: RefCounted,
 	is_critical_value: bool,

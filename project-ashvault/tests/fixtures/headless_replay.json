@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "batches": [
+    {
+      "tick": 1,
+      "commands": [
+        {"tick": 1, "actor_id": 1, "command_type": "command.aim", "aim_vector": [1.0, 0.0], "ability_slot": -1, "client_sequence": 1},
+        {"tick": 1, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 2}
+      ]
+    },
+    {"tick": 2, "commands": [{"tick": 2, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 3}]},
+    {"tick": 16, "commands": [{"tick": 16, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 4}]},
+    {"tick": 17, "commands": [{"tick": 17, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 5}]},
+    {"tick": 31, "commands": [{"tick": 31, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 6}]},
+    {"tick": 32, "commands": [{"tick": 32, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 7}]},
+    {"tick": 46, "commands": [{"tick": 46, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 8}]},
+    {"tick": 47, "commands": [{"tick": 47, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 9}]},
+    {"tick": 61, "commands": [{"tick": 61, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 10}]},
+    {"tick": 62, "commands": [{"tick": 62, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 11}]},
+    {"tick": 76, "commands": [{"tick": 76, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 12}]},
+    {"tick": 77, "commands": [{"tick": 77, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 13}]},
+    {"tick": 91, "commands": [{"tick": 91, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 14}]},
+    {"tick": 92, "commands": [{"tick": 92, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 15}]},
+    {"tick": 106, "commands": [{"tick": 106, "actor_id": 1, "command_type": "command.cast_start", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 16}]},
+    {"tick": 107, "commands": [{"tick": 107, "actor_id": 1, "command_type": "command.cast_release", "aim_vector": [1.0, 0.0], "ability_slot": 0, "client_sequence": 17}]}
+  ]
+}

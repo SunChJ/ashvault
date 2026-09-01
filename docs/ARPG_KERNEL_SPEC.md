@@ -389,13 +389,14 @@ depth, entity counts, and tick-time percentiles.
 Every damage result and generated item must be explainable by source IDs. Debug
 traces are opt-in so production-density tests do not pay their allocation cost.
 
-Performance reports use a versioned machine-readable contract with runtime and
+Performance reports use versioned machine-readable contracts with runtime and
 workload metadata, sample count, entity-count statistics, and nearest-rank P50,
-P95, and P99 tick times. The harness advances simulation directly under a
-headless `SceneTree`; loading or awaiting rendered frames is forbidden. The M0
-synthetic fixed-tick workload validates this reporting path and is replaced by
-the production headless combat simulation in M1 without changing the report
-contract.
+P95, and P99 tick times. Harnesses advance simulation directly under a headless
+`SceneTree`; loading or awaiting rendered frames is forbidden. The M0 synthetic
+fixed-tick report remains frozen at schema version 1. The M1 production combat
+simulator publishes its deterministic replay and combat fields through the
+separate `simulation-report.schema.json` contract, while reusing the same
+`PerformanceMetrics` aggregation for observed tick measurements.
 
 ## 13. Performance and compatibility targets
 

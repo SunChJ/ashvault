@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "build_id": "build.fixture.stormweaver",
+  "actor": {
+    "runtime_id": 1,
+    "definition_id": "entity.player.stormweaver",
+    "position": [0.0, 0.0],
+    "health": 500,
+    "max_health": 500,
+    "resource": 100.0,
+    "max_resource": 100.0
+  },
+  "ability": {
+    "slot": 0,
+    "ability_id": "ability.fixture.arc_bolt",
+    "rank": 1,
+    "damage_type_id": "damage.lightning",
+    "base_damage": 12.0,
+    "power": 80.0,
+    "power_coefficient": 0.5,
+    "critical_chance": 0.25,
+    "critical_multiplier": 2.0
+  },
+  "mitigation": {
+    "defense": 10.0,
+    "resistance": 0.1
+  }
+}

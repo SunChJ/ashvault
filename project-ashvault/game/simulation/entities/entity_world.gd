@@ -3,6 +3,7 @@ extends RefCounted
 
 const PlayerCommandContract = preload("res://game/simulation/commands/player_command.gd")
 const CommandResult = preload("res://game/simulation/commands/command_batch_result.gd")
+const DamageResultContract = preload("res://game/simulation/combat/damage_result.gd")
 const EntityStateContract = preload("res://game/simulation/entities/entity_state.gd")
 const EntitySnapshot = preload("res://game/simulation/snapshots/presentation_entity_snapshot.gd")
 const Snapshot = preload("res://game/simulation/snapshots/presentation_snapshot.gd")
@@ -62,7 +63,7 @@ func entity_state(runtime_id: int) -> RefCounted:
 	return value._duplicate_state()
 
 
-func advance_tick(commands: Array) -> RefCounted:
+func advance_tick(commands: Array, damage_results: Array = []) -> RefCounted:
 	var expected_tick := _tick + 1
 	if not _is_configured:
 		return _rejected(
@@ -79,6 +80,14 @@ func advance_tick(commands: Array) -> RefCounted:
 				"command.invalid",
 				null,
 				"Command batches may contain only configured PlayerCommand values."
+			)
+	for value: Variant in damage_results:
+		if not value is DamageResultContract or not value.is_configured():
+			return _rejected_damage(
+				expected_tick,
+				"damage.invalid_result",
+				null,
+				"Entity ticks may commit only configured DamageResult values."
 			)
 	sorted_commands.sort_custom(_command_precedes)
 
@@ -152,6 +161,28 @@ func advance_tick(commands: Array) -> RefCounted:
 				transition_error
 			)
 		staged_sequences[command.actor_id()] = command.client_sequence()
+
+	for damage_result: RefCounted in damage_results:
+		if not staged_entities.has(damage_result.target_entity_id()):
+			return _rejected_damage(
+				expected_tick,
+				"damage.unknown_target",
+				damage_result,
+				"Damage target %d does not exist." % damage_result.target_entity_id()
+			)
+		var target: RefCounted = staged_entities[damage_result.target_entity_id()]
+		if not staged_copies.has(damage_result.target_entity_id()):
+			target = target._duplicate_state()
+			staged_entities[damage_result.target_entity_id()] = target
+			staged_copies[damage_result.target_entity_id()] = true
+		var damage_error: String = target._apply_damage_result(damage_result)
+		if not damage_error.is_empty():
+			return _rejected_damage(
+				expected_tick,
+				"damage.invalid_commit",
+				damage_result,
+				damage_error
+			)
 
 	_tick = expected_tick
 	_entities = staged_entities
@@ -235,6 +266,34 @@ func _rejected(
 			"tick": tick_value,
 			"actor_id": actor_id,
 			"client_sequence": client_sequence,
+			"message": message,
+		}]
+	)
+
+
+func _rejected_damage(
+	tick_value: int,
+	code: String,
+	damage_result: Variant,
+	message: String
+) -> RefCounted:
+	var source_entity_id := 0
+	var target_entity_id := 0
+	var origin_event_id := 0
+	if damage_result is DamageResultContract:
+		source_entity_id = damage_result.source_entity_id()
+		target_entity_id = damage_result.target_entity_id()
+		origin_event_id = damage_result.origin_event_id()
+	return _result(
+		tick_value,
+		false,
+		0,
+		[{
+			"code": code,
+			"tick": tick_value,
+			"source_entity_id": source_entity_id,
+			"target_entity_id": target_entity_id,
+			"origin_event_id": origin_event_id,
 			"message": message,
 		}]
 	)

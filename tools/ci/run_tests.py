@@ -77,6 +77,9 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
     performance_report = (
         repository_root / ".artifacts" / "performance" / "ci-baseline.json"
     )
+    simulation_report = (
+        repository_root / ".artifacts" / "simulation" / "ci-report.json"
+    )
     godot_base = [str(godot), "--headless", "--path", str(project_root)]
     return [
         TestCommand(
@@ -90,6 +93,8 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
                 "tests/tools/ci/test_run_tests.py",
                 "tests/tools/ci/test_workflow_contract.py",
                 "tests/tools/performance/test_validate_report.py",
+                "tests/tools/simulation/test_run_headless.py",
+                "tests/tools/simulation/test_validate_report.py",
                 "tests/tools/research/test_sync_hero_siege.py",
             ],
         ),
@@ -140,6 +145,46 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             "production-entity-commands",
             godot_base
             + ["--script", "res://tests/production/test_entity_commands.gd"],
+        ),
+        TestCommand(
+            "production-headless-simulation",
+            godot_base
+            + ["--script", "res://tests/production/test_headless_simulation.gd"],
+        ),
+        TestCommand(
+            "headless-simulation-cli",
+            [
+                sys.executable,
+                "-m",
+                "tools.simulation.run_headless",
+                "--godot",
+                str(godot),
+                "--build",
+                str(project_root / "tests/fixtures/headless_build.json"),
+                "--encounter",
+                str(project_root / "tests/fixtures/headless_encounter.json"),
+                "--replay",
+                str(project_root / "tests/fixtures/headless_replay.json"),
+                "--root-seed",
+                "424242",
+                "--simulation-version",
+                "1",
+                "--content-version",
+                "1",
+                "--duration-seconds",
+                "2",
+                "--output",
+                str(simulation_report),
+            ],
+        ),
+        TestCommand(
+            "simulation-report-schema",
+            [
+                sys.executable,
+                "-m",
+                "tools.simulation.validate_report",
+                str(simulation_report),
+            ],
         ),
         TestCommand(
             "performance-baseline",
