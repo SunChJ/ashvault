@@ -32,10 +32,13 @@ migration/compatibility policy. Compatible additions may retain the version.
 
 ## Validation
 
-- Run the unified M0 validation suite locally with Godot 4.7.2.
-- Run the same suite on the GitHub macOS and Windows CI matrix.
-- Confirm M0-01 through M0-05 are closed before delivery.
-- Deliver M0-06 through a PR whose merge automatically closes the Issue.
+- `python3 tools/ci/run_tests.py` passed locally with Godot 4.7.2: 30 Python
+  tests, four production GDScript contract suites, performance report
+  generation/schema validation, two prototype regressions, and the main-scene
+  smoke test.
+- GitHub macOS 14 and Windows 2022 jobs passed on PR #54.
+- M0-01 through M0-05 were closed before delivery.
+- PR #54 used `Closes #6`; its merge automatically closed M0-06.
 
 ## Accepted deviations
 
@@ -50,9 +53,10 @@ M0 surface.
 
 ## Current state
 
-The freeze is implemented and the unified local suite passes with Godot 4.7.2,
-including 30 Python tests, the dedicated GDScript freeze test, all production
-contract tests, performance report generation/schema validation, prototype
-regression tests, and the main-scene smoke test. GitHub matrix validation and
-M0 milestone closure remain pending the M0-06 PR. M1 work stays blocked until
-that merge completes.
+PR #54 completed the M0 contract freeze in merge commit `9953256`. All six M0
+tasks closed and the M0 milestone exited with no unresolved ownership or
+compatibility deviation. M1 production-kernel work is unblocked.
+
+M0-06 and its milestone were temporarily reopened only to deliver this
+post-merge state correction through the required PR workflow; no frozen
+contract changed during finalization.
