@@ -26,8 +26,8 @@ for later milestones. Their status is explicit:
 | --- | --- |
 | Sections 2–3 | Implemented and frozen in M0 |
 | M0 performance report contract in section 12 | Implemented and frozen in M0 |
-| Sections 5–6 | Implemented in M1-01/M1-02 and compatibility-controlled |
-| Section 4, sections 7–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
+| Sections 4–9 | Implemented through M1-06 and compatibility-controlled |
+| Sections 10–11, production simulator behavior in section 12, and section 13 | Accepted for downstream implementation |
 
 The frozen public surface is:
 
@@ -39,6 +39,7 @@ The frozen public surface is:
 | Content, simulation, and save version fields | `project-ashvault/game/infrastructure/version_info.gd` | Individual version field |
 | Performance aggregation and report shape | `project-ashvault/game/infrastructure/performance_metrics.gd`, `performance/performance-report.schema.json` | Report `schema_version` |
 | Headless macOS and Windows validation entrypoint | `tools/ci/run_tests.py`, `.github/workflows/ci.yml` | CI workflow contract |
+| Fixed-tick entity commands and presentation snapshots | `project-ashvault/game/simulation/entities/entity_world.gd`, `commands/player_command.gd`, `snapshots/presentation_snapshot.gd` | `simulation_version` |
 
 Breaking changes to a frozen contract require its compatibility key to change,
 together with updated tests and an explicit migration or compatibility policy.
@@ -109,8 +110,9 @@ content. Gameplay may start only with a successfully loaded catalog.
 
 ## 4. Commands and simulation clock
 
-Simulation advances on a fixed tick. Presentation frame rate does not determine
-combat results. Input adapters emit commands containing:
+Simulation advances through explicit 60 Hz ticks. Presentation frame rate does
+not determine combat results, and an empty command batch still advances one
+tick. Input adapters emit commands containing:
 
 ```text
 tick
@@ -121,12 +123,32 @@ ability_slot
 client_sequence
 ```
 
-The slice supports movement, aim, cast start, cast release, and cancel. Unknown,
-late, impossible, or duplicate commands are rejected with a diagnostic result;
-they do not partially mutate state.
+The slice uses the stable command IDs `command.move`, `command.aim`,
+`command.cast_start`, `command.cast_release`, and `command.cancel`. The
+`aim_vector` field carries movement input for `command.move` and aim intent for
+the other directional commands. It is an input value only in M1-06; M2 owns
+spatial integration and cast timing.
+
+One tick is a transaction. Commands are staged in actor-ID/client-sequence
+order, and the complete staged batch publishes only when every transition is
+valid. Unknown, late, future, impossible, non-player, non-monotonic, or duplicate
+commands return one diagnostic and accept zero commands. Rejection does not
+advance the tick, consume a client sequence, or retain earlier transitions from
+the batch. Client sequences are positive and strictly increasing per actor.
+
+Entity cast intent transitions from idle to started, then to released or
+canceled. Released and canceled are observable for the accepted tick and return
+to idle at the start of the next accepted tick.
 
 The `client_sequence` field is reserved for future authority validation. It does
 not imply networking in the slice.
+
+The simulation publishes immutable `PresentationSnapshot` values sorted by
+runtime entity ID. Each snapshot includes a SHA-256 hash of the authoritative
+tick, fixed-rate identifier, entity state, and accepted client-sequence state.
+Hash input uses canonical ordered arrays with schema version 1; dictionary
+iteration order is never hashed. Constructing snapshots is a pure read, so
+disabling presentation cannot change authoritative state or replay hashes.
 
 ## 5. Deterministic RNG
 

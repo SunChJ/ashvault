@@ -71,3 +71,17 @@ configured requests for `CombatEventQueue`; other effect kinds become typed
 simulation commands for later state owners. A failed effect publishes no
 partial outputs. Damage-type conversion modifiers enter only `DamageContext`
 and are consumed exactly once by the damage pipeline.
+
+## Entity state, commands, and snapshots
+
+`entities/EntityWorld` owns compact runtime entity state and advances through
+explicit 60 Hz command batches. Commands are immutable DTOs. Each batch uses
+copy-on-write staging, orders work by actor ID and client sequence, and commits
+the entire tick only when every transition is valid. Rejection leaves tick,
+entity state, and sequence state unchanged.
+
+`snapshots/PresentationSnapshot` publishes runtime-ID-sorted immutable entity
+views. Its SHA-256 state hash uses a versioned canonical array schema and is
+identical whether presentation snapshots are requested or disabled. Movement
+and cast commands represent player intent here; M2 systems own spatial
+integration, cooldowns, costs, and effect commitment.
