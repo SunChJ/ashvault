@@ -126,3 +126,6 @@ ceiling.
 - Updated 2026-09-02: M2 spatial delivery uses a transactional fixed-tick world
   for targeting, swept projectiles, areas, chains, and persistent pulses — see
   [`014-delivery-runtime.md`](014-delivery-runtime.md).
+- Updated 2026-09-02: M2 statuses use an immutable catalog and transactional
+  fixed-tick world for stacking, refresh, immunity, cleanse, expiry, and Shock
+  modifiers — see [`015-status-runtime.md`](015-status-runtime.md).

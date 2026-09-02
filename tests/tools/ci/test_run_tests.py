@@ -58,6 +58,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-player-movement",
                 "production-cast-runtime",
                 "production-delivery-runtime",
+                "production-status-runtime",
                 "production-headless-simulation",
                 "headless-simulation-cli",
                 "simulation-report-schema",

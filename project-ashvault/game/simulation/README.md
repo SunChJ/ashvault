@@ -99,6 +99,22 @@ derives projectile speed and lifetime from its effect command when it creates a
 delivery definition; those values must not become a second authored balance
 source.
 
+## Statuses
+
+`statuses/StatusWorld` owns active status identity, stacks, expiry, immunity,
+cleanse, and forced removal at the fixed-tick boundary. Immutable definitions
+declare application-duration bounds and additive/replace/maximum stacking,
+keep/reset/extend refresh, and cleansable/protected removal policies. Mutations
+are globally increasing and transactional; the world retains one mutation
+watermark rather than an unbounded history.
+
+Active status IDs are published as damage conditions. Status damage templates
+materialize ordinary `DamageModifier` values, so Shock and later ailments pass
+through `DamagePipeline` instead of adding status-specific arithmetic. Applied
+statuses publish `event.status_applied` requests for `CombatEventQueue`; status
+code never invokes proc handlers recursively. State Charts may mirror status
+state for UI or animation but cannot own simulation timing or mutation.
+
 ## Entity state, commands, and snapshots
 
 `entities/EntityWorld` owns compact runtime entity state and advances through
