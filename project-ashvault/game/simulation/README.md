@@ -134,6 +134,10 @@ the authoritative commit boundary to keep replay state stable across supported
 platforms. Attack composition remains a later consumer and must route through
 `DamagePipeline`.
 
+Enemy state-hash schema v4 serializes floats as millionth-unit fixed-point
+integers before hashing. This avoids platform-specific shortest-decimal
+rendering of the same `float32` value without changing older world hashes.
+
 ## Entity state, commands, and snapshots
 
 `entities/EntityWorld` owns compact runtime entity state and advances through

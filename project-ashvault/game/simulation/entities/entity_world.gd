@@ -34,6 +34,7 @@ const MOVEMENT_STATE_HASH_SCHEMA_VERSION := 2
 const CAST_STATE_HASH_SCHEMA_VERSION := 3
 const ENEMY_STATE_HASH_SCHEMA_VERSION := 4
 const ENEMY_POSITION_QUANTUM := 0.001
+const ENEMY_HASH_FLOAT_SCALE := 1_000_000.0
 
 var _tick := -1
 var _entities: Dictionary = {}
@@ -508,6 +509,7 @@ func _compute_state_hash() -> String:
 			entity_values,
 			sequence_values,
 		]
+		canonical = _fixed_point_hash_values(canonical)
 	elif not _ability_loadouts.is_empty():
 		var loadout_values: Array = []
 		for actor_id: int in _sorted_ids(_ability_loadouts):
@@ -616,6 +618,19 @@ static func _quantized_enemy_position(value: Vector2) -> Vector2:
 		snappedf(value.x, ENEMY_POSITION_QUANTUM),
 		snappedf(value.y, ENEMY_POSITION_QUANTUM)
 	)
+
+
+static func _fixed_point_hash_values(value: Variant) -> Variant:
+	match typeof(value):
+		TYPE_FLOAT:
+			return roundi(value * ENEMY_HASH_FLOAT_SCALE)
+		TYPE_ARRAY:
+			var result: Array = []
+			for item: Variant in value:
+				result.append(_fixed_point_hash_values(item))
+			return result
+		_:
+			return value
 
 
 static func _command_precedes(left: RefCounted, right: RefCounted) -> bool:

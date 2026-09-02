@@ -37,6 +37,9 @@ uses the same continuous bounds/obstacle sweeps.
 Enemy positions are quantized to `0.001` world units at their authoritative
 commit boundary so platform-specific vector normalization tails cannot enter or
 accumulate in replay state.
+Schema v4 also converts canonical floats to millionth-unit fixed-point integers
+before JSON serialization. This removes the remaining Windows/macOS difference
+in shortest-decimal formatting for identical `float32` coordinates.
 
 `CommandBatchResult` gains immutable attack-intent and combat-event collections.
 The original fields and call shape remain compatible. Entity hashes use a new

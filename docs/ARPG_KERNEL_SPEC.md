@@ -426,6 +426,11 @@ stability. An enemy in range publishes an immutable attack intent on its exact
 cooldown tick; M2-06 must compose that intent through the ordinary ability and
 damage pipeline.
 
+Enemy state-hash schema v4 converts every canonical float to a millionth-unit
+fixed-point integer before JSON serialization. Older world schemas remain
+unchanged; platform-specific float-to-decimal formatting cannot alter v4
+replay hashes.
+
 Godot navigation maps may be introduced with authored room topology, and
 LimboAI may drive low-count boss or elite intent. Neither may become a second
 owner of ordinary-enemy simulation state.
