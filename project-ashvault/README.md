@@ -25,11 +25,11 @@ Damage resolves through explicit multiplicative stages:
 ```text
 base = source * (1 + enhanced) + flat
 final = base
-      * (1 + increased)
-      * product(more)
-      * critical
-      * resistance_multiplier
-      * (1 + conditional)
+	  * (1 + increased)
+	  * product(more)
+	  * critical
+	  * resistance_multiplier
+	  * (1 + conditional)
 ```
 
 Raw haste passes through a saturating transform before reducing action

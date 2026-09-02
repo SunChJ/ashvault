@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bonphy57obgux"]
 
-[ext_resource type="Script" path="res://prototype/numerical_sketch.gd" id="1_sketch"]
+[ext_resource type="Script" uid="uid://bxcfs1gfuy8v5" path="res://prototype/numerical_sketch.gd" id="1_sketch"]
 
-[node name="NumericalSketch" type="Node2D"]
+[node name="NumericalSketch" type="Node2D" unique_id=1842035926]
 script = ExtResource("1_sketch")
+
+[node name="Node" type="Node" parent="." unique_id=266454303]
