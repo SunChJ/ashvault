@@ -9,6 +9,8 @@ software, assets, trademarks, or research material.
 | Component | Location | License | Copyright |
 | --- | --- | --- | --- |
 | Aseprite Wizard | `project-ashvault/addons/AsepriteWizard/` | MIT | Copyright 2020 Vinicius Gerevini |
+| Godot State Charts | `project-ashvault/addons/godot_state_charts/` | MIT | Copyright 2023 Jan Thomä |
+| Godot State Charts cooldown example icons | `project-ashvault/godot_state_charts_examples/cooldown/` | CC BY 3.0 | J. W. Bjerk (eleazzaar) |
 | Phantom Camera | `project-ashvault/addons/phantom_camera/` | MIT | Copyright 2022 Marcus Skov |
 
 The complete license text for each bundled component is retained in its
