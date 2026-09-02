@@ -6,7 +6,7 @@
 | **Product target** | Production vertical slice |
 | **Runtime** | Godot 4.7.2 |
 | **Platforms** | Windows and macOS |
-| **Source of truth** | This document and linked specifications |
+| **Source of truth** | This document, [engineering principles](GODOT_ENGINEERING_PRINCIPLES.md), and linked specifications |
 
 ## 1. Target outcome
 
@@ -38,6 +38,13 @@ combined simulation/presentation structure.
   work.
 - Direct pushes to `main` are not an implementation delivery path.
 - Stable behavior is developed test-first where practical.
+- Every task names the shortest deterministic reproduction path and the
+  structured or inspectable evidence that proves its outcome before the full
+  regression gate.
+- New abstractions and tools require observed repeated friction. Automation is
+  accepted only when lifetime benefit plausibly exceeds implementation,
+  maintenance, compatibility, learning, future-change, and cognitive cost by
+  at least 10x.
 - Product rules live in the kernel or content definitions, never in UI/VFX.
 - Any public contract change updates
   [`ARPG_KERNEL_SPEC.md`](ARPG_KERNEL_SPEC.md) in the same change.
@@ -47,6 +54,10 @@ combined simulation/presentation structure.
   deliberate, manually reviewed change.
 - `P0` blocks the slice. `P1` is required for the milestone gate. `P2` may be
   deferred only through an explicit taskbook amendment.
+- Engineering decisions follow
+  [`GODOT_ENGINEERING_PRINCIPLES.md`](GODOT_ENGINEERING_PRINCIPLES.md): use
+  simple Godot-native primitives, explicit dependencies, feature-tailored data,
+  and domain observability before general frameworks.
 
 ### Issue body contract
 

@@ -37,3 +37,5 @@ writing, amendment, and verification rules.
 | [001](001-hero-siege-reference-data/000-plan.md) | Hero Siege reference data | 2026-09-01 | Reproducible, provenance-aware local research snapshots without vendoring third-party content. |
 | [002](002-numerical-combat-sketch/000-plan.md) | Numerical combat sketch | 2026-09-01 | Playable damage, experience, skill-growth, density, and power-spike prototype. |
 | [003](003-production-vertical-slice/000-plan.md) | Production vertical slice | 2026-09-01 | Kernel-first active-ARPG slice with persistent loot, modular dungeon, and gated execution tasks. |
+| [004](004-repository-licensing/000-plan.md) | Repository licensing | 2026-09-02 | Noncommercial project licensing with preserved third-party terms. |
+| [005](005-godot-engineering-productivity/000-plan.md) | Godot engineering productivity | 2026-09-02 | Reproducible iteration, Godot-native defaults, observability, and evidence-based tooling ROI. |

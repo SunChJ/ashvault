@@ -50,9 +50,10 @@ body:
     id: validation
     attributes:
       label: Validation
-      description: List exact automated and runtime evidence required.
+      description: Name the shortest deterministic reproduction path, then the exact automated and runtime evidence required.
       placeholder: |-
-        - [ ] Command or scenario
-        - [ ] Artifact or report
+        - [ ] Focused command, direct scene, fixture, preset, and RNG seed
+        - [ ] Structured output, capture, artifact, or report
+        - [ ] Full regression gate
     validations:
       required: true

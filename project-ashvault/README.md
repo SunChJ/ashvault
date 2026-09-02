@@ -42,8 +42,9 @@ modules. It contains no production item, save, content, or rendering APIs.
 
 Production development is governed by the repository-level
 [`DEVELOPMENT_TASKBOOK.md`](../docs/DEVELOPMENT_TASKBOOK.md) and
-[`ARPG_KERNEL_SPEC.md`](../docs/ARPG_KERNEL_SPEC.md). Production code must not
-import the prototype as a gameplay dependency.
+[`ARPG_KERNEL_SPEC.md`](../docs/ARPG_KERNEL_SPEC.md). Engineering decisions also
+follow [`GODOT_ENGINEERING_PRINCIPLES.md`](../docs/GODOT_ENGINEERING_PRINCIPLES.md).
+Production code must not import the prototype as a gameplay dependency.
 
 Production source belongs under [`game/`](game/README.md), separated into
 simulation, content, presentation, and infrastructure roots. The current main
