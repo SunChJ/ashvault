@@ -7,14 +7,14 @@ not own authoritative simulation state.
 
 | Component | Intended milestone | Project role | Status / boundary |
 | --- | --- | --- | --- |
-| Aseprite Wizard | M2 | `.aseprite` import to `SpriteFrames` / `AnimationPlayer` | Installed manually; editor-only asset pipeline. |
+| Aseprite Wizard 9.8.0 | M2 | `.aseprite` import to `SpriteFrames` / `AnimationPlayer` | Installed manually; editor-only asset pipeline. |
 | Phantom Camera 0.11.0.3 | M2-08 | Camera2D composition and feedback | Installed; presentation only. Simulation snapshots remain authoritative. |
-| Godot State Charts | M2 | Player, ability, and combat presentation orchestration | Preferred candidate; may mirror simulation snapshots but not own deterministic rules. |
+| [Godot State Charts 0.22.5](https://github.com/derkork/godot-statecharts) | M2 | Player, ability, and combat presentation orchestration | Selected for manual installation; may mirror simulation snapshots but not own deterministic rules. |
 | LimboAI | M2-05 | Enemy behavior trees and hierarchical state machines | Preferred candidate; AI decisions must emit simulation commands. |
-| GdUnit4 or GUT | Cross-cutting | Scene, integration, mocks, and test reporting | Evaluate one framework when it adds coverage beyond the existing headless harness. |
+| [GdUnit4 6.2.1](https://github.com/godot-gdunit-labs/gdUnit4) | Cross-cutting | Scene, integration, mocks, and test reporting | Selected as the primary Godot test framework; migrate incrementally while retaining deterministic contract gates. |
 | Limbo Console | M2/M3 | In-game developer commands and diagnostics | Preferred candidate; development-only adapters call validated APIs. |
 | Controller Icons | M2-07 | Automatic keyboard/controller prompts | Preferred candidate; presentation only. |
-| Gloot | M3 | Inventory, item, and equipment workflow | Preferred candidate; evaluate against Ashvault item-instance and save contracts before adoption. |
+| [Gloot 3.0.2](https://github.com/peter-kish/gloot) | M3 | Inventory, item, and equipment workflow | Selected for manual installation behind project-owned item-instance and save adapters. |
 | Better Terrain | M4 | TileMap terrain authoring | Evaluate when modular dungeon authoring begins. |
 | Dialogue Manager | M4 | NPC dialogue and branching text | Evaluate when narrative content enters production. |
 | Sentry Godot | Post-alpha | Crash, error, and release monitoring | Defer until consent, privacy, release-symbol, and environment policies exist. |
@@ -22,3 +22,5 @@ not own authoritative simulation state.
 
 Each implementation issue must still verify the selected component's current
 release, license, Godot compatibility, and maintenance state before installation.
+Install tagged releases independently, retain their upstream licenses, and keep
+vendor upgrades isolated from project-authored behavior changes.
