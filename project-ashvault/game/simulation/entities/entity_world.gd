@@ -33,6 +33,7 @@ const STATE_HASH_SCHEMA_VERSION := 1
 const MOVEMENT_STATE_HASH_SCHEMA_VERSION := 2
 const CAST_STATE_HASH_SCHEMA_VERSION := 3
 const ENEMY_STATE_HASH_SCHEMA_VERSION := 4
+const ENEMY_POSITION_QUANTUM := 0.000001
 
 var _tick := -1
 var _entities: Dictionary = {}
@@ -434,7 +435,14 @@ func advance_tick(
 			enemy_entity = enemy_entity._duplicate_state()
 			staged_entities[enemy_id] = enemy_entity
 			staged_copies[enemy_id] = true
-		var position_error: String = enemy_entity._apply_position(movement_result["position"])
+		var next_position := _quantized_enemy_position(movement_result["position"])
+		var placement_error: String = _movement_environment.placement_error_for(
+			next_position,
+			enemy_definition.collision_radius()
+		)
+		if not placement_error.is_empty():
+			return _rejected_enemy(expected_tick, enemy_id, placement_error)
+		var position_error: String = enemy_entity._apply_position(next_position)
 		if not position_error.is_empty():
 			return _rejected_enemy(expected_tick, enemy_id, position_error)
 
@@ -601,6 +609,13 @@ static func _kill_event(damage_result: RefCounted) -> RefCounted:
 	)
 	assert(error.is_empty(), "Resolved damage must produce a valid kill event request.")
 	return request
+
+
+static func _quantized_enemy_position(value: Vector2) -> Vector2:
+	return Vector2(
+		snappedf(value.x, ENEMY_POSITION_QUANTUM),
+		snappedf(value.y, ENEMY_POSITION_QUANTUM)
+	)
 
 
 static func _command_precedes(left: RefCounted, right: RefCounted) -> bool:

@@ -129,8 +129,10 @@ source, and ability. Only an alive-to-dead transition publishes `event.kill`,
 which makes overkill and repeated corpse hits unable to duplicate kill credit.
 Living enemies retain a valid target or choose the nearest player by distance
 and runtime ID, move through the shared bounded environment, and publish typed
-attack intents on exact fixed-tick cadence. Attack composition remains a later
-consumer and must route through `DamagePipeline`.
+attack intents on exact fixed-tick cadence. Enemy positions are quantized at
+the authoritative commit boundary to keep replay state stable across supported
+platforms. Attack composition remains a later consumer and must route through
+`DamagePipeline`.
 
 ## Entity state, commands, and snapshots
 

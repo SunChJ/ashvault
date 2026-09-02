@@ -420,9 +420,11 @@ order. Exactly one `event.kill` request is emitted when health crosses from
 alive to dead; overkill and later corpse hits cannot create another kill.
 Living enemies retain a valid target or acquire the nearest living player by
 distance and runtime ID. Movement uses actor-specific speed and radius through
-the shared bounded environment and stops at inclusive attack range. An enemy in
-range publishes an immutable attack intent on its exact cooldown tick; M2-06
-must compose that intent through the ordinary ability and damage pipeline.
+the shared bounded environment, stops at inclusive attack range, and quantizes
+position at the authoritative commit boundary for cross-platform replay
+stability. An enemy in range publishes an immutable attack intent on its exact
+cooldown tick; M2-06 must compose that intent through the ordinary ability and
+damage pipeline.
 
 Godot navigation maps may be introduced with authored room topology, and
 LimboAI may drive low-count boss or elite intent. Neither may become a second
