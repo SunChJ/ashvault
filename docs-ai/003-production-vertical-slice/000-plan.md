@@ -129,3 +129,6 @@ ceiling.
 - Updated 2026-09-02: M2 statuses use an immutable catalog and transactional
   fixed-tick world for stacking, refresh, immunity, cleanse, expiry, and Shock
   modifiers — see [`015-status-runtime.md`](015-status-runtime.md).
+- Updated 2026-09-02: M2 ordinary enemies extend the entity world with compact
+  seek/attack state, typed attack intents, and transition-owned kill events —
+  see [`016-enemy-runtime.md`](016-enemy-runtime.md).

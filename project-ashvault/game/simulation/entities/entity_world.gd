@@ -11,6 +11,18 @@ const CastInterruptionContract = preload(
 const CommandResult = preload("res://game/simulation/commands/command_batch_result.gd")
 const DamageResultContract = preload("res://game/simulation/combat/damage_result.gd")
 const EntityStateContract = preload("res://game/simulation/entities/entity_state.gd")
+const EnemyAttackIntentContract = preload(
+	"res://game/simulation/enemies/enemy_attack_intent.gd"
+)
+const EnemyDefinitionContract = preload(
+	"res://game/simulation/enemies/enemy_definition.gd"
+)
+const EnemyRuntimeStateContract = preload(
+	"res://game/simulation/enemies/enemy_runtime_state.gd"
+)
+const CombatEventRequestContract = preload(
+	"res://game/simulation/events/combat_event_request.gd"
+)
 const MovementEnvironmentContract = preload("res://game/simulation/movement/movement_environment.gd")
 const EntitySnapshot = preload("res://game/simulation/snapshots/presentation_entity_snapshot.gd")
 const Snapshot = preload("res://game/simulation/snapshots/presentation_snapshot.gd")
@@ -20,12 +32,17 @@ const FIXED_DELTA_SECONDS := 1.0 / float(FIXED_TICKS_PER_SECOND)
 const STATE_HASH_SCHEMA_VERSION := 1
 const MOVEMENT_STATE_HASH_SCHEMA_VERSION := 2
 const CAST_STATE_HASH_SCHEMA_VERSION := 3
+const ENEMY_STATE_HASH_SCHEMA_VERSION := 4
+const ENEMY_POSITION_QUANTUM := 0.001
+const ENEMY_HASH_FLOAT_SCALE := 1_000_000.0
 
 var _tick := -1
 var _entities: Dictionary = {}
 var _last_client_sequences: Dictionary = {}
 var _movement_environment: RefCounted = null
 var _ability_loadouts: Dictionary = {}
+var _enemy_definitions: Dictionary = {}
+var _enemy_states: Dictionary = {}
 var _state_hash := ""
 var _is_configured := false
 
@@ -34,7 +51,8 @@ func configure(
 	initial_entities: Array,
 	initial_tick: int = 0,
 	movement_environment: Variant = null,
-	ability_loadouts: Dictionary = {}
+	ability_loadouts: Dictionary = {},
+	enemy_definitions: Dictionary = {}
 ) -> String:
 	if _is_configured:
 		return "Entity world is already configured."
@@ -75,12 +93,49 @@ func configure(
 		if not cast_error.is_empty():
 			return "Actor %d cast runtime is invalid: %s" % [actor_id, cast_error]
 		staged_loadouts[actor_id] = staged_loadout
+	var staged_enemy_definitions: Dictionary = {}
+	var staged_enemy_states: Dictionary = {}
+	var enemy_ids: Array = enemy_definitions.keys()
+	for enemy_id_value: Variant in enemy_ids:
+		if not enemy_id_value is int or enemy_id_value <= 0:
+			return "Enemy definition actor IDs must be positive integers."
+	enemy_ids.sort()
+	if not enemy_ids.is_empty() and movement_environment == null:
+		return "Enemy runtime requires a configured movement environment."
+	for enemy_id_value: Variant in enemy_ids:
+		var enemy_id: int = enemy_id_value
+		if not staged_entities.has(enemy_id):
+			return "Enemy runtime actor %d does not exist." % enemy_id
+		var enemy_entity: RefCounted = staged_entities[enemy_id]
+		if enemy_entity.is_player_controlled():
+			return "Enemy runtime actor %d must not be player controlled." % enemy_id
+		var enemy_definition: Variant = enemy_definitions[enemy_id]
+		if not enemy_definition is EnemyDefinitionContract or not enemy_definition.is_configured():
+			return "Enemy runtime actor %d requires a configured EnemyDefinition." % enemy_id
+		if enemy_definition.definition_id() != enemy_entity.definition_id():
+			return "Enemy runtime actor %d definition does not match its entity." % enemy_id
+		var enemy_placement_error: String = movement_environment.placement_error_for(
+			enemy_entity.position(),
+			enemy_definition.collision_radius()
+		)
+		if not enemy_placement_error.is_empty():
+			return "Enemy %d has invalid movement placement: %s" % [
+				enemy_id,
+				enemy_placement_error,
+			]
+		staged_enemy_definitions[enemy_id] = enemy_definition
+		var enemy_state := EnemyRuntimeStateContract.new()
+		var enemy_state_error: String = enemy_state.configure(enemy_id)
+		assert(enemy_state_error.is_empty(), "Valid enemy runtime state must configure.")
+		staged_enemy_states[enemy_id] = enemy_state
 	_tick = initial_tick
 	_entities = staged_entities
 	_movement_environment = (
 		movement_environment._duplicate_value() if movement_environment != null else null
 	)
 	_ability_loadouts = staged_loadouts
+	_enemy_definitions = staged_enemy_definitions
+	_enemy_states = staged_enemy_states
 	for runtime_id: int in _sorted_entity_ids():
 		if _entities[runtime_id].is_player_controlled():
 			_last_client_sequences[runtime_id] = 0
@@ -108,6 +163,18 @@ func entity_state(runtime_id: int) -> RefCounted:
 	if value == null:
 		return null
 	return value._duplicate_state()
+
+
+func enemy_target_id(runtime_id: int) -> int:
+	var value: Variant = _enemy_states.get(runtime_id)
+	return value.target_id() if value != null else 0
+
+
+func enemy_runtime_values() -> Array:
+	var values: Array = []
+	for runtime_id: int in _sorted_ids(_enemy_states):
+		values.append(_enemy_states[runtime_id].canonical_values())
+	return values
 
 
 func advance_tick(
@@ -149,12 +216,19 @@ func advance_tick(
 				"Entity ticks may contain only configured CastInterruption values."
 			)
 	sorted_commands.sort_custom(_command_precedes)
+	var sorted_damage_results: Array = damage_results.duplicate()
+	sorted_damage_results.sort_custom(_damage_precedes)
 	var sorted_interruptions: Array = cast_interruptions.duplicate()
 	sorted_interruptions.sort_custom(_interruption_precedes)
 
 	var staged_entities := _entities.duplicate()
 	var staged_sequences := _last_client_sequences.duplicate()
+	var staged_enemy_states: Dictionary = {}
+	for enemy_id: int in _sorted_ids(_enemy_states):
+		staged_enemy_states[enemy_id] = _enemy_states[enemy_id]._duplicate_state()
 	var staged_copies: Dictionary = {}
+	var enemy_attack_intents: Array = []
+	var combat_events: Array = []
 	for runtime_id: int in _sorted_ids(staged_entities):
 		if staged_entities[runtime_id]._requires_tick_transition(expected_tick):
 			var transitioned: RefCounted = staged_entities[runtime_id]._duplicate_state()
@@ -281,7 +355,7 @@ func advance_tick(
 			if not position_error.is_empty():
 				return _rejected_movement(expected_tick, runtime_id, position_error)
 
-	for damage_result: RefCounted in damage_results:
+	for damage_result: RefCounted in sorted_damage_results:
 		if not staged_entities.has(damage_result.target_entity_id()):
 			return _rejected_damage(
 				expected_tick,
@@ -290,6 +364,7 @@ func advance_tick(
 				"Damage target %d does not exist." % damage_result.target_entity_id()
 			)
 		var target: RefCounted = staged_entities[damage_result.target_entity_id()]
+		var was_alive: bool = target.is_alive()
 		if not staged_copies.has(damage_result.target_entity_id()):
 			target = target._duplicate_state()
 			staged_entities[damage_result.target_entity_id()] = target
@@ -302,12 +377,89 @@ func advance_tick(
 				damage_result,
 				damage_error
 			)
+		if was_alive and not target.is_alive():
+			combat_events.append(_kill_event(damage_result))
+
+	for enemy_id: int in _sorted_ids(staged_enemy_states):
+		var enemy_entity: RefCounted = staged_entities[enemy_id]
+		var enemy_state: RefCounted = staged_enemy_states[enemy_id]
+		if not enemy_entity.is_alive():
+			enemy_state._set_target_id(0)
+			continue
+		var enemy_definition: RefCounted = _enemy_definitions[enemy_id]
+		var target_id := _retained_or_nearest_target(
+			enemy_entity,
+			enemy_state.target_id(),
+			enemy_definition.acquisition_range(),
+			staged_entities
+		)
+		enemy_state._set_target_id(target_id)
+		if target_id == 0:
+			continue
+		var target_entity: RefCounted = staged_entities[target_id]
+		var displacement: Vector2 = target_entity.position() - enemy_entity.position()
+		var distance := displacement.length()
+		if distance <= enemy_definition.attack_range():
+			if expected_tick >= enemy_state.next_attack_tick():
+				var intent := EnemyAttackIntentContract.new()
+				var intent_error: String = intent.configure(
+					expected_tick,
+					enemy_id,
+					target_id,
+					enemy_definition.attack_id(),
+					enemy_entity.position(),
+					target_entity.position()
+				)
+				if not intent_error.is_empty():
+					return _rejected_enemy(expected_tick, enemy_id, intent_error)
+				enemy_attack_intents.append(intent)
+				enemy_state._set_next_attack_tick(
+					expected_tick + enemy_definition.attack_cooldown_ticks()
+				)
+			continue
+		var allowed_distance := maxf(0.0, distance - enemy_definition.attack_range())
+		var desired_distance := minf(
+			enemy_definition.movement_speed_per_second() * FIXED_DELTA_SECONDS,
+			allowed_distance
+		)
+		var movement_result: Dictionary = _movement_environment.resolve_position_for(
+			enemy_entity.position(),
+			displacement.normalized(),
+			FIXED_DELTA_SECONDS,
+			enemy_definition.collision_radius(),
+			desired_distance / FIXED_DELTA_SECONDS
+		)
+		var movement_error: String = movement_result.get("error", "")
+		if not movement_error.is_empty():
+			return _rejected_enemy(expected_tick, enemy_id, movement_error)
+		if not staged_copies.has(enemy_id):
+			enemy_entity = enemy_entity._duplicate_state()
+			staged_entities[enemy_id] = enemy_entity
+			staged_copies[enemy_id] = true
+		var next_position := _quantized_enemy_position(movement_result["position"])
+		var placement_error: String = _movement_environment.placement_error_for(
+			next_position,
+			enemy_definition.collision_radius()
+		)
+		if not placement_error.is_empty():
+			return _rejected_enemy(expected_tick, enemy_id, placement_error)
+		var position_error: String = enemy_entity._apply_position(next_position)
+		if not position_error.is_empty():
+			return _rejected_enemy(expected_tick, enemy_id, position_error)
 
 	_tick = expected_tick
 	_entities = staged_entities
 	_last_client_sequences = staged_sequences
+	_enemy_states = staged_enemy_states
 	_state_hash = ""
-	return _result(_tick, true, sorted_commands.size(), [])
+	return _result(
+		_tick,
+		true,
+		sorted_commands.size(),
+		[],
+		enemy_attack_intents,
+		combat_events
+	)
 
 
 func presentation_snapshot() -> RefCounted:
@@ -333,7 +485,32 @@ func _compute_state_hash() -> String:
 	for runtime_id: int in sequence_ids:
 		sequence_values.append([runtime_id, _last_client_sequences[runtime_id]])
 	var canonical: Array
-	if not _ability_loadouts.is_empty():
+	if not _enemy_definitions.is_empty():
+		var enemy_definition_values: Array = []
+		for actor_id: int in _sorted_ids(_enemy_definitions):
+			enemy_definition_values.append([
+				actor_id,
+				_enemy_definitions[actor_id].canonical_values(),
+			])
+		var enemy_state_values: Array = []
+		for actor_id: int in _sorted_ids(_enemy_states):
+			enemy_state_values.append(_enemy_states[actor_id].canonical_values())
+		var loadout_values: Array = []
+		for actor_id: int in _sorted_ids(_ability_loadouts):
+			loadout_values.append([actor_id, _ability_loadouts[actor_id].canonical_values()])
+		canonical = [
+			ENEMY_STATE_HASH_SCHEMA_VERSION,
+			FIXED_TICKS_PER_SECOND,
+			_tick,
+			_movement_environment.canonical_values(),
+			loadout_values,
+			enemy_definition_values,
+			enemy_state_values,
+			entity_values,
+			sequence_values,
+		]
+		canonical = _fixed_point_hash_values(canonical)
+	elif not _ability_loadouts.is_empty():
 		var loadout_values: Array = []
 		for actor_id: int in _sorted_ids(_ability_loadouts):
 			loadout_values.append([actor_id, _ability_loadouts[actor_id].canonical_values()])
@@ -381,6 +558,81 @@ static func _sorted_ids(values: Dictionary) -> Array:
 	return result
 
 
+static func _retained_or_nearest_target(
+	enemy: RefCounted,
+	current_target_id: int,
+	acquisition_range: float,
+	entities: Dictionary
+) -> int:
+	var range_squared := acquisition_range * acquisition_range
+	if _is_valid_enemy_target(enemy, current_target_id, range_squared, entities):
+		return current_target_id
+	var nearest_target_id := 0
+	var nearest_distance_squared := INF
+	for runtime_id: int in _sorted_ids(entities):
+		if not _is_valid_enemy_target(enemy, runtime_id, range_squared, entities):
+			continue
+		var target: RefCounted = entities[runtime_id]
+		var distance_squared: float = enemy.position().distance_squared_to(target.position())
+		if distance_squared < nearest_distance_squared:
+			nearest_target_id = runtime_id
+			nearest_distance_squared = distance_squared
+	return nearest_target_id
+
+
+static func _is_valid_enemy_target(
+	enemy: RefCounted,
+	target_id: int,
+	range_squared: float,
+	entities: Dictionary
+) -> bool:
+	if target_id <= 0 or not entities.has(target_id):
+		return false
+	var target: RefCounted = entities[target_id]
+	return (
+		target.is_player_controlled()
+		and target.is_alive()
+		and enemy.position().distance_squared_to(target.position()) <= range_squared
+	)
+
+
+static func _kill_event(damage_result: RefCounted) -> RefCounted:
+	var request := CombatEventRequestContract.new()
+	var error: String = request.configure(
+		"event.kill",
+		damage_result.source_entity_id(),
+		damage_result.target_entity_id(),
+		damage_result.ability_id(),
+		PackedStringArray(["event.kill"]),
+		{
+			"committed_damage": damage_result.committed_amount(),
+			"origin_event_id": damage_result.origin_event_id(),
+		}
+	)
+	assert(error.is_empty(), "Resolved damage must produce a valid kill event request.")
+	return request
+
+
+static func _quantized_enemy_position(value: Vector2) -> Vector2:
+	return Vector2(
+		snappedf(value.x, ENEMY_POSITION_QUANTUM),
+		snappedf(value.y, ENEMY_POSITION_QUANTUM)
+	)
+
+
+static func _fixed_point_hash_values(value: Variant) -> Variant:
+	match typeof(value):
+		TYPE_FLOAT:
+			return roundi(value * ENEMY_HASH_FLOAT_SCALE)
+		TYPE_ARRAY:
+			var result: Array = []
+			for item: Variant in value:
+				result.append(_fixed_point_hash_values(item))
+			return result
+		_:
+			return value
+
+
 static func _command_precedes(left: RefCounted, right: RefCounted) -> bool:
 	if left.actor_id() != right.actor_id():
 		return left.actor_id() < right.actor_id()
@@ -393,6 +645,16 @@ static func _interruption_precedes(left: RefCounted, right: RefCounted) -> bool:
 	if left.actor_id() != right.actor_id():
 		return left.actor_id() < right.actor_id()
 	return left.reason_id() < right.reason_id()
+
+
+static func _damage_precedes(left: RefCounted, right: RefCounted) -> bool:
+	if left.target_entity_id() != right.target_entity_id():
+		return left.target_entity_id() < right.target_entity_id()
+	if left.origin_event_id() != right.origin_event_id():
+		return left.origin_event_id() < right.origin_event_id()
+	if left.source_entity_id() != right.source_entity_id():
+		return left.source_entity_id() < right.source_entity_id()
+	return left.ability_id() < right.ability_id()
 
 
 func _rejected(
@@ -463,6 +725,20 @@ func _rejected_movement(tick_value: int, actor_id: int, message: String) -> RefC
 	)
 
 
+func _rejected_enemy(tick_value: int, actor_id: int, message: String) -> RefCounted:
+	return _result(
+		tick_value,
+		false,
+		0,
+		[{
+			"code": "enemy.invalid_state",
+			"tick": tick_value,
+			"actor_id": actor_id,
+			"message": message,
+		}]
+	)
+
+
 func _rejected_interruption(
 	tick_value: int,
 	code: String,
@@ -492,8 +768,17 @@ static func _result(
 	tick_value: int,
 	is_success: bool,
 	accepted_count: int,
-	diagnostics: Array
+	diagnostics: Array,
+	enemy_attack_intents: Array = [],
+	combat_events: Array = []
 ) -> RefCounted:
 	var result := CommandResult.new()
-	result._configure(tick_value, is_success, accepted_count, diagnostics)
+	result._configure(
+		tick_value,
+		is_success,
+		accepted_count,
+		diagnostics,
+		enemy_attack_intents,
+		combat_events
+	)
 	return result

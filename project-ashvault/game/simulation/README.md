@@ -115,6 +115,29 @@ statuses publish `event.status_applied` requests for `CombatEventQueue`; status
 code never invokes proc handlers recursively. State Charts may mirror status
 state for UI or animation but cannot own simulation timing or mutation.
 
+## Ordinary enemies
+
+`entities/EntityWorld` owns ordinary enemy position, health, target, and attack
+cadence alongside player entities. Immutable `enemies/EnemyDefinition` values
+provide acquisition range, movement speed, collision radius, attack range,
+cooldown ticks, and stable attack ID. Runtime state remains three compact
+integers per enemy; ordinary enemies do not allocate scene, navigation-agent,
+behavior-tree, or state-chart Nodes.
+
+Damage commits precede enemy decisions and are ordered by target, origin event,
+source, and ability. Only an alive-to-dead transition publishes `event.kill`,
+which makes overkill and repeated corpse hits unable to duplicate kill credit.
+Living enemies retain a valid target or choose the nearest player by distance
+and runtime ID, move through the shared bounded environment, and publish typed
+attack intents on exact fixed-tick cadence. Enemy positions are quantized at
+the authoritative commit boundary to keep replay state stable across supported
+platforms. Attack composition remains a later consumer and must route through
+`DamagePipeline`.
+
+Enemy state-hash schema v4 serializes floats as millionth-unit fixed-point
+integers before hashing. This avoids platform-specific shortest-decimal
+rendering of the same `float32` value without changing older world hashes.
+
 ## Entity state, commands, and snapshots
 
 `entities/EntityWorld` owns compact runtime entity state and advances through
