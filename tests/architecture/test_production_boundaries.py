@@ -52,6 +52,14 @@ class ProductionBoundaryTests(unittest.TestCase):
             "Autoloads must resolve before a fresh checkout has built its UID cache.",
         )
 
+    def test_editor_plugin_updaters_do_not_make_ci_network_dependent(self) -> None:
+        contents = PROJECT_CONFIG.read_text(encoding="utf-8")
+        self.assertRegex(
+            contents,
+            r"(?ms)^\[phantom_camera\]\n.*^updater/updater_mode=0$",
+            "Phantom Camera's editor updater must remain disabled.",
+        )
+
     def test_required_production_roots_exist(self) -> None:
         for root_name in REQUIRED_ROOTS:
             with self.subTest(root=root_name):
