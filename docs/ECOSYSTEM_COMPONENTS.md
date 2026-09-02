@@ -8,7 +8,7 @@ not own authoritative simulation state.
 | Component | Intended milestone | Project role | Status / boundary |
 | --- | --- | --- | --- |
 | Aseprite Wizard | M2 | `.aseprite` import to `SpriteFrames` / `AnimationPlayer` | Installed manually; editor-only asset pipeline. |
-| Phantom Camera | M2-08 | Camera2D composition and feedback | Preferred candidate; presentation only. |
+| Phantom Camera 0.11.0.3 | M2-08 | Camera2D composition and feedback | Installed; presentation only. Simulation snapshots remain authoritative. |
 | Godot State Charts | M2 | Player, ability, and combat presentation orchestration | Preferred candidate; may mirror simulation snapshots but not own deterministic rules. |
 | LimboAI | M2-05 | Enemy behavior trees and hierarchical state machines | Preferred candidate; AI decisions must emit simulation commands. |
 | GdUnit4 or GUT | Cross-cutting | Scene, integration, mocks, and test reporting | Evaluate one framework when it adds coverage beyond the existing headless harness. |

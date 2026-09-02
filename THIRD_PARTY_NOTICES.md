@@ -9,6 +9,7 @@ software, assets, trademarks, or research material.
 | Component | Location | License | Copyright |
 | --- | --- | --- | --- |
 | Aseprite Wizard | `project-ashvault/addons/AsepriteWizard/` | MIT | Copyright 2020 Vinicius Gerevini |
+| Phantom Camera | `project-ashvault/addons/phantom_camera/` | MIT | Copyright 2022 Marcus Skov |
 
 The complete license text for each bundled component is retained in its
 component directory. Future third-party components must retain their upstream
