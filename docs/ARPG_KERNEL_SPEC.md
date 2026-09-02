@@ -379,6 +379,34 @@ and lifetime authority remain in simulation. M2-06 composes a delivery request
 from `AbilityEffectCommand` plus delivery-specific geometry. Projectile speed
 and lifetime are derived from the effect command rather than authored twice.
 
+### 9.2 Status runtime and Shock
+
+`StatusWorld` is configured from immutable definitions and owns active status
+state at the fixed-tick boundary. A definition declares stable identity and
+tags, accepted application-duration bounds, maximum stacks, stacking policy,
+refresh policy, removal policy, and optional conditional damage modifiers.
+
+| Policy | Supported data-defined behavior |
+| --- | --- |
+| Stacking | Add, replace, or retain the maximum stack count, capped by the definition. |
+| Refresh | Keep current expiry, reset from the application tick, or extend current expiry. |
+| Removal | Cleanse when permitted, or force removal for authoritative lifecycle cleanup. |
+| Immunity | Match an exact status ID or any status tag from the target snapshot. |
+
+Expiry is exclusive: a status with expiry tick `N` is removed before mutations
+at tick `N`. Expiration and mutations publish immutable change records. Invalid
+batches commit no tick, active state, or mutation watermark. A forced removal
+may clean up state after target loss; gameplay cleanses require a live target.
+
+Active status IDs enter `DamageContext.active_conditions`. Shock materializes a
+normal conditional `DamageModifier` scaled by its stack count and is resolved in
+the existing conditional damage stage. The concrete Shock duration, stack cap,
+and percentage remain authored Stormweaver content owned by M2-06.
+
+Successful applications emit configured `event.status_applied` requests. They
+must be enqueued through `CombatEventQueue`; status code cannot call reaction
+handlers directly or bypass self-reentry, depth, and per-tick budget guards.
+
 ## 10. Items and rarity semantics
 
 `ItemDefinition` is immutable authored content. `ItemInstance` contains:
