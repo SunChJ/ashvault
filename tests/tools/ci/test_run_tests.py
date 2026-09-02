@@ -43,6 +43,7 @@ class CiTestRunnerTests(unittest.TestCase):
             names,
             [
                 "python-tests",
+                "project-import",
                 "m0-contract-freeze",
                 "production-identity-contracts",
                 "production-content-catalog",
@@ -64,6 +65,17 @@ class CiTestRunnerTests(unittest.TestCase):
                 "numerical-core",
                 "numerical-sketch",
                 "main-scene-smoke",
+            ],
+        )
+        self.assertEqual(
+            commands[1].arguments,
+            [
+                "/godot",
+                "--headless",
+                "--path",
+                str(repository_root / "project-ashvault"),
+                "--editor",
+                "--quit",
             ],
         )
         self.assertIn(
