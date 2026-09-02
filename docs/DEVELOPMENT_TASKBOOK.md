@@ -42,6 +42,9 @@ combined simulation/presentation structure.
 - Any public contract change updates
   [`ARPG_KERNEL_SPEC.md`](ARPG_KERNEL_SPEC.md) in the same change.
 - Third-party research data is design evidence only and never ships at runtime.
+- Ecosystem candidates and authority boundaries are tracked in
+  [`ECOSYSTEM_COMPONENTS.md`](ECOSYSTEM_COMPONENTS.md); installation remains a
+  deliberate, manually reviewed change.
 - `P0` blocks the slice. `P1` is required for the milestone gate. `P2` may be
   deferred only through an explicit taskbook amendment.
 
