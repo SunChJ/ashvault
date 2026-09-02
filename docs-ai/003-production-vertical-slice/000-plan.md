@@ -123,3 +123,6 @@ ceiling.
 - Updated 2026-09-02: M2 ability activation gains integer-tick cast phases,
   atomic cost/cooldown commitment, and data-driven cancellation rules — see
   [`013-cast-runtime.md`](013-cast-runtime.md).
+- Updated 2026-09-02: M2 spatial delivery uses a transactional fixed-tick world
+  for targeting, swept projectiles, areas, chains, and persistent pulses — see
+  [`014-delivery-runtime.md`](014-delivery-runtime.md).

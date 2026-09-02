@@ -353,6 +353,32 @@ The Stormweaver slice binds:
 | R | Storm Totem | Persistent casting entity |
 | Space | Tempest Dash | Movement, invulnerability window, cancel rules |
 
+### 9.1 Spatial delivery runtime
+
+`DeliveryWorld` is the authoritative fixed-tick owner for projectile movement,
+instant areas, target chains, persistent pulses, and their hit records. It
+accepts immutable target snapshots rather than scene nodes. Requests are sorted
+by globally increasing request ID; active runtime objects are sorted by their
+monotonic runtime ID.
+
+| Delivery | Deterministic rule |
+| --- | --- |
+| Projectile | Swept segment-circle collision, then earliest contact time and target ID. |
+| Area | Inclusive radius query, then distance and target ID. |
+| Chain | Recover a missing primary target, then exclude prior targets per jump. |
+| Persistent | Pulse on spawn and fixed intervals before the exclusive expiry tick. |
+
+Projectile and persistent delivery use compact scalar `RefCounted` state. Area
+and chain requests resolve immediately without allocating a runtime object. The
+world stores one accepted-request watermark instead of an unbounded ID history.
+A rejected target/request batch commits no tick, allocator, active-state, or
+watermark changes.
+
+State Charts may mirror delivery state for animation and feedback, but collision
+and lifetime authority remain in simulation. M2-06 composes a delivery request
+from `AbilityEffectCommand` plus delivery-specific geometry. Projectile speed
+and lifetime are derived from the effect command rather than authored twice.
+
 ## 10. Items and rarity semantics
 
 `ItemDefinition` is immutable authored content. `ItemInstance` contains:

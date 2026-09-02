@@ -79,6 +79,26 @@ manual cancellation, external interruptions, and cancel-into behavior are
 owned by `EntityWorld`. Scene timers and animation state may mirror snapshots
 but never advance this runtime.
 
+## Spatial delivery
+
+`delivery/DeliveryWorld` owns projectile movement, area selection, chain
+ordering, persistent pulses, and authoritative hit publication at 60 Hz. It
+consumes immutable target snapshots and delivery requests, then advances compact
+`RefCounted` state without Nodes or physics-server callbacks.
+
+Requests use globally increasing IDs. The world retains one request watermark,
+one runtime-object allocator, and only active projectile/persistent state, so
+deduplication does not grow with session length. Projectile collision uses swept
+segment-circle tests ordered by contact time and target ID. Area and chain
+selection use distance and target ID. Boundary contact is inclusive.
+
+Presentation may consume active-state values and hit records. Godot State Charts
+may mirror their phases, but presentation never selects targets, resolves
+collision, advances pulses, or expires runtime objects. Ability composition
+derives projectile speed and lifetime from its effect command when it creates a
+delivery definition; those values must not become a second authored balance
+source.
+
 ## Entity state, commands, and snapshots
 
 `entities/EntityWorld` owns compact runtime entity state and advances through
