@@ -36,13 +36,15 @@ class CiTestRunnerTests(unittest.TestCase):
 
     def test_commands_cover_python_production_and_prototype_checks(self) -> None:
         repository_root = Path("/repo")
-        commands = run_tests.build_commands(Path("/godot"), repository_root)
+        godot = Path("/godot")
+        commands = run_tests.build_commands(godot, repository_root)
         names = [command.name for command in commands]
 
         self.assertEqual(
             names,
             [
                 "python-tests",
+                "project-import",
                 "m0-contract-freeze",
                 "production-identity-contracts",
                 "production-content-catalog",
@@ -66,6 +68,17 @@ class CiTestRunnerTests(unittest.TestCase):
                 "main-scene-smoke",
             ],
         )
+        self.assertEqual(
+            commands[1].arguments,
+            [
+                str(godot),
+                "--headless",
+                "--path",
+                str(repository_root / "project-ashvault"),
+                "--editor",
+                "--quit",
+            ],
+        )
         self.assertIn(
             "tests/tools/ci/test_workflow_contract.py",
             commands[0].arguments,
@@ -79,7 +92,7 @@ class CiTestRunnerTests(unittest.TestCase):
             commands[0].arguments,
         )
         godot_commands = [
-            command for command in commands if command.arguments[0] == "/godot"
+            command for command in commands if command.arguments[0] == str(godot)
         ]
         for command in godot_commands:
             self.assertIn(str(repository_root / "project-ashvault"), command.arguments)

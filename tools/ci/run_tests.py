@@ -100,6 +100,10 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             ],
         ),
         TestCommand(
+            "project-import",
+            godot_base + ["--editor", "--quit"],
+        ),
+        TestCommand(
             "m0-contract-freeze",
             godot_base
             + ["--script", "res://tests/production/test_m0_contract_freeze.gd"],

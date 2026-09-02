@@ -7,6 +7,7 @@ from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 PROJECT_ROOT = REPOSITORY_ROOT / "project-ashvault"
+PROJECT_CONFIG = PROJECT_ROOT / "project.godot"
 PRODUCTION_ROOT = PROJECT_ROOT / "game"
 PROTOTYPE_ROOT = PROJECT_ROOT / "prototype"
 REQUIRED_ROOTS = (
@@ -36,6 +37,21 @@ FORBIDDEN_DEPENDENCIES = {
 
 
 class ProductionBoundaryTests(unittest.TestCase):
+    def test_project_autoloads_use_checkout_portable_resource_paths(self) -> None:
+        contents = PROJECT_CONFIG.read_text(encoding="utf-8")
+        autoload_section = re.search(
+            r"^\[autoload\]\n(?P<body>.*?)(?=^\[|\Z)",
+            contents,
+            re.MULTILINE | re.DOTALL,
+        )
+
+        self.assertIsNotNone(autoload_section, "Missing project autoload section.")
+        self.assertNotIn(
+            "uid://",
+            autoload_section.group("body"),
+            "Autoloads must resolve before a fresh checkout has built its UID cache.",
+        )
+
     def test_required_production_roots_exist(self) -> None:
         for root_name in REQUIRED_ROOTS:
             with self.subTest(root=root_name):
