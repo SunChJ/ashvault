@@ -72,6 +72,13 @@ simulation commands for later state owners. A failed effect publishes no
 partial outputs. Damage-type conversion modifiers enter only `DamageContext`
 and are consumed exactly once by the damage pipeline.
 
+`abilities/AbilityLoadout` binds definitions and cast policies to actor slots.
+Cast start validates without spending; a ready release atomically spends cost
+and starts cooldown. Integer ready/recovery/cooldown ticks, movement policy,
+manual cancellation, external interruptions, and cancel-into behavior are
+owned by `EntityWorld`. Scene timers and animation state may mirror snapshots
+but never advance this runtime.
+
 ## Entity state, commands, and snapshots
 
 `entities/EntityWorld` owns compact runtime entity state and advances through
@@ -89,6 +96,8 @@ or a physics server.
 `snapshots/PresentationSnapshot` publishes runtime-ID-sorted immutable entity
 views. Its SHA-256 state hash uses a versioned canonical array schema and is
 identical whether presentation snapshots are requested or disabled. Worlds
-without movement retain the M1 hash schema; movement-enabled worlds include the
-canonical collision configuration in schema version 2. Cast commands remain
-intent until their owning M2 system commits timing, costs, and effects.
+without movement or loadouts retain the M1 hash schema; movement-only worlds
+include canonical collision configuration in schema version 2. Loadout-enabled
+worlds use schema version 3 and expose resource, cast/recovery progress, and
+per-slot cooldowns for presentation. Effect execution remains a downstream
+consumer of the observable released phase.

@@ -120,3 +120,6 @@ ceiling.
 - Updated 2026-09-01: M2 starts with action-mapped input commands and optional
   fixed-tick swept-AABB player movement — see
   [`012-player-input-movement.md`](012-player-input-movement.md).
+- Updated 2026-09-02: M2 ability activation gains integer-tick cast phases,
+  atomic cost/cooldown commitment, and data-driven cancellation rules — see
+  [`013-cast-runtime.md`](013-cast-runtime.md).

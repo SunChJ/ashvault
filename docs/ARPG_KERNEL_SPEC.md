@@ -147,9 +147,21 @@ commands return one diagnostic and accept zero commands. Rejection does not
 advance the tick, consume a client sequence, or retain earlier transitions from
 the batch. Client sequences are positive and strictly increasing per actor.
 
-Entity cast intent transitions from idle to started, then to released or
-canceled. Released and canceled are observable for the accepted tick and return
-to idle at the start of the next accepted tick.
+Actors may opt into an immutable ability loadout that binds definitions and
+cast policies to integer slots. Cast start validates slot, cooldown, and
+resource but spends nothing. Release is valid only at or after the authored
+ready tick; it atomically spends the resource cost and starts the slot cooldown.
+The released phase is observable for that tick, followed by the exact authored
+number of recovery ticks before idle. Invalid transitions reject the entire
+world tick without consuming resources or client sequences.
+
+Cast policies declare whether non-zero movement is allowed, locked, or cancels
+the active cast; whether manual cancellation is allowed; which stable external
+interruption reasons are accepted; and whether a binding may replace another
+interruptible cast. Tempest Dash uses the same policy data as every other
+ability and requires no ability-ID branch. Listed interruptions are applied in
+actor/reason order before commands; unlisted reasons are deterministic no-ops.
+Death always cancels a started or recovering cast.
 
 The `client_sequence` field is reserved for future authority validation. It does
 not imply networking in the slice.
@@ -157,11 +169,12 @@ not imply networking in the slice.
 The simulation publishes immutable `PresentationSnapshot` values sorted by
 runtime entity ID. Each snapshot includes a SHA-256 hash of the authoritative
 tick, fixed-rate identifier, entity state, and accepted client-sequence state.
-Worlds without movement preserve canonical hash schema version 1. Movement
-worlds use schema version 2 and include normalized collision configuration.
-Dictionary iteration order is never hashed. Constructing snapshots is a pure
-read, so disabling presentation cannot change authoritative state or replay
-hashes.
+Worlds without movement or loadouts preserve canonical hash schema version 1.
+Movement-only worlds use schema version 2 and include normalized collision
+configuration. Loadout-enabled worlds use schema version 3 and additionally
+include cast policy, timing, cooldown, and resource state. Dictionary iteration
+order is never hashed. Constructing snapshots is a pure read, so disabling
+presentation cannot change authoritative state or replay hashes.
 
 ## 5. Deterministic RNG
 

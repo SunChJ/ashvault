@@ -13,6 +13,14 @@ var _resource := 0.0
 var _max_resource := 0.0
 var _cast_phase := "cast.idle"
 var _ability_slot := -1
+var _snapshot_tick := -1
+var _resource_id := ""
+var _cast_started_tick := -1
+var _cast_ready_tick := -1
+var _recovery_end_tick := -1
+var _cooldown_end_ticks: Dictionary = {}
+var _last_cancel_reason := ""
+var _has_cast_runtime := false
 var _is_configured := false
 
 
@@ -68,8 +76,53 @@ func ability_slot() -> int:
 	return _ability_slot
 
 
+func resource_id() -> String:
+	return _resource_id
+
+
+func cast_ticks_remaining() -> int:
+	if not _has_cast_runtime or _cast_phase != "cast.started":
+		return 0
+	return maxi(0, _cast_ready_tick - _snapshot_tick)
+
+
+func recovery_ticks_remaining() -> int:
+	if not _has_cast_runtime:
+		return 0
+	if _cast_phase == "cast.released":
+		return maxi(0, _recovery_end_tick - _snapshot_tick - 1)
+	if _cast_phase == "cast.recovering":
+		return maxi(0, _recovery_end_tick - _snapshot_tick)
+	return 0
+
+
+func cooldown_ticks_remaining(ability_slot_value: int) -> int:
+	if not _has_cast_runtime:
+		return 0
+	return maxi(0, int(_cooldown_end_ticks.get(ability_slot_value, 0)) - _snapshot_tick)
+
+
+func cooldowns() -> Array:
+	if not _has_cast_runtime:
+		return []
+	var result: Array = []
+	var slots: Array = _cooldown_end_ticks.keys()
+	slots.sort()
+	for slot: int in slots:
+		result.append({
+			"ability_slot": slot,
+			"end_tick": _cooldown_end_ticks[slot],
+			"remaining_ticks": cooldown_ticks_remaining(slot),
+		})
+	return result
+
+
+func last_cancel_reason() -> String:
+	return _last_cancel_reason
+
+
 func to_dictionary() -> Dictionary:
-	return {
+	var result := {
 		"runtime_id": _runtime_id,
 		"definition_id": _definition_id,
 		"is_player_controlled": _is_player_controlled,
@@ -84,9 +137,19 @@ func to_dictionary() -> Dictionary:
 		"cast_phase": _cast_phase,
 		"ability_slot": _ability_slot,
 	}
+	if _has_cast_runtime:
+		result["resource_id"] = _resource_id
+		result["cast_started_tick"] = _cast_started_tick
+		result["cast_ready_tick"] = _cast_ready_tick
+		result["cast_ticks_remaining"] = cast_ticks_remaining()
+		result["recovery_end_tick"] = _recovery_end_tick
+		result["recovery_ticks_remaining"] = recovery_ticks_remaining()
+		result["cooldowns"] = cooldowns()
+		result["last_cancel_reason"] = _last_cancel_reason
+	return result
 
 
-func _publish(entity: RefCounted) -> void:
+func _publish(entity: RefCounted, snapshot_tick_value: int = -1) -> void:
 	if _is_configured:
 		return
 	_runtime_id = entity.runtime_id()
@@ -101,4 +164,13 @@ func _publish(entity: RefCounted) -> void:
 	_max_resource = entity.max_resource()
 	_cast_phase = entity.cast_phase()
 	_ability_slot = entity.ability_slot()
+	_snapshot_tick = snapshot_tick_value
+	if entity.has_cast_runtime():
+		_resource_id = entity.resource_id()
+		_cast_started_tick = entity.cast_started_tick()
+		_cast_ready_tick = entity.cast_ready_tick()
+		_recovery_end_tick = entity.recovery_end_tick()
+		_cooldown_end_ticks = entity.cooldown_end_ticks()
+		_last_cancel_reason = entity.last_cancel_reason()
+		_has_cast_runtime = true
 	_is_configured = true
