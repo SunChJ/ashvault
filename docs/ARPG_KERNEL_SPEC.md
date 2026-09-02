@@ -407,6 +407,27 @@ Successful applications emit configured `event.status_applied` requests. They
 must be enqueued through `CombatEventQueue`; status code cannot call reaction
 handlers directly or bypass self-reentry, depth, and per-tick budget guards.
 
+### 9.3 Ordinary enemy runtime
+
+`EntityWorld` is the authoritative owner of ordinary enemy position, health,
+target selection, attack cadence, and death transition. Each enemy combines an
+immutable definition with compact runtime state: actor ID, current target ID,
+and next attack tick. Ordinary enemies do not require a scene Node,
+`NavigationAgent2D`, behavior tree, or state chart.
+
+Damage results commit before enemy decisions in stable target/event/source
+order. Exactly one `event.kill` request is emitted when health crosses from
+alive to dead; overkill and later corpse hits cannot create another kill.
+Living enemies retain a valid target or acquire the nearest living player by
+distance and runtime ID. Movement uses actor-specific speed and radius through
+the shared bounded environment and stops at inclusive attack range. An enemy in
+range publishes an immutable attack intent on its exact cooldown tick; M2-06
+must compose that intent through the ordinary ability and damage pipeline.
+
+Godot navigation maps may be introduced with authored room topology, and
+LimboAI may drive low-count boss or elite intent. Neither may become a second
+owner of ordinary-enemy simulation state.
+
 ## 10. Items and rarity semantics
 
 `ItemDefinition` is immutable authored content. `ItemInstance` contains:

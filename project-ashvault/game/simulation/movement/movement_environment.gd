@@ -71,11 +71,18 @@ func speed_per_second() -> float:
 
 
 func placement_error(position: Vector2) -> String:
+	return placement_error_for(position, _actor_radius)
+
+
+func placement_error_for(position: Vector2, actor_radius_value: float) -> String:
 	if not _is_configured:
 		return "Movement environment is not configured."
 	if not position.is_finite():
 		return "Entity placement must be finite."
-	var effective_bounds := _effective_bounds()
+	var radius_error := _actor_radius_error(actor_radius_value)
+	if not radius_error.is_empty():
+		return radius_error
+	var effective_bounds := _effective_bounds(actor_radius_value)
 	if (
 		position.x < effective_bounds.position.x
 		or position.x > effective_bounds.end.x
@@ -84,22 +91,40 @@ func placement_error(position: Vector2) -> String:
 	):
 		return "Entity placement must remain inside movement bounds."
 	for obstacle: Rect2 in _obstacles:
-		if _point_is_inside(position, _expanded_obstacle(obstacle)):
+		if _point_is_inside(position, _expanded_obstacle(obstacle, actor_radius_value)):
 			return "Entity placement overlaps a movement obstacle."
 	return ""
 
 
 func resolve_position(position: Vector2, movement_input: Vector2, fixed_delta: float) -> Dictionary:
-	var start_error := placement_error(position)
+	return resolve_position_for(
+		position,
+		movement_input,
+		fixed_delta,
+		_actor_radius,
+		_speed_per_second
+	)
+
+
+func resolve_position_for(
+	position: Vector2,
+	movement_input: Vector2,
+	fixed_delta: float,
+	actor_radius_value: float,
+	speed_per_second_value: float
+) -> Dictionary:
+	var start_error := placement_error_for(position, actor_radius_value)
 	if not start_error.is_empty():
 		return {"position": position, "error": start_error}
 	if not movement_input.is_finite() or movement_input.length_squared() > 1.000001:
 		return {"position": position, "error": "Movement input must be finite with length at most one."}
 	if not is_finite(fixed_delta) or fixed_delta <= 0.0:
 		return {"position": position, "error": "Movement fixed delta must be finite and positive."}
+	if not is_finite(speed_per_second_value) or speed_per_second_value < 0.0:
+		return {"position": position, "error": "Movement speed must be finite and non-negative."}
 
-	var displacement := movement_input * _speed_per_second * fixed_delta
-	var effective_bounds := _effective_bounds()
+	var displacement := movement_input * speed_per_second_value * fixed_delta
+	var effective_bounds := _effective_bounds(actor_radius_value)
 	var resolved := position
 	resolved.x = clampf(
 		resolved.x + displacement.x,
@@ -111,7 +136,7 @@ func resolve_position(position: Vector2, movement_input: Vector2, fixed_delta: f
 			position,
 			resolved.x,
 			displacement.x,
-			_expanded_obstacle(obstacle)
+			_expanded_obstacle(obstacle, actor_radius_value)
 		)
 
 	var position_after_x := Vector2(resolved.x, position.y)
@@ -125,10 +150,10 @@ func resolve_position(position: Vector2, movement_input: Vector2, fixed_delta: f
 			position_after_x,
 			resolved.y,
 			displacement.y,
-			_expanded_obstacle(obstacle)
+			_expanded_obstacle(obstacle, actor_radius_value)
 		)
 
-	var resolved_error := placement_error(resolved)
+	var resolved_error := placement_error_for(resolved, actor_radius_value)
 	if not resolved_error.is_empty():
 		return {"position": position, "error": resolved_error}
 	return {"position": resolved, "error": ""}
@@ -164,14 +189,25 @@ func _duplicate_value() -> RefCounted:
 	return result
 
 
-func _effective_bounds() -> Rect2:
-	var radius_offset := Vector2(_actor_radius, _actor_radius)
+func _effective_bounds(actor_radius_value: float) -> Rect2:
+	var radius_offset := Vector2(actor_radius_value, actor_radius_value)
 	return Rect2(_bounds.position + radius_offset, _bounds.size - radius_offset * 2.0)
 
 
-func _expanded_obstacle(obstacle: Rect2) -> Rect2:
-	var radius_offset := Vector2(_actor_radius, _actor_radius)
+func _expanded_obstacle(obstacle: Rect2, actor_radius_value: float) -> Rect2:
+	var radius_offset := Vector2(actor_radius_value, actor_radius_value)
 	return Rect2(obstacle.position - radius_offset, obstacle.size + radius_offset * 2.0)
+
+
+func _actor_radius_error(actor_radius_value: float) -> String:
+	if not is_finite(actor_radius_value) or actor_radius_value < 0.0:
+		return "Movement actor radius must be finite and non-negative."
+	if (
+		actor_radius_value * 2.0 >= _bounds.size.x
+		or actor_radius_value * 2.0 >= _bounds.size.y
+	):
+		return "Movement actor radius must leave usable arena bounds."
+	return ""
 
 
 static func _sweep_x(
