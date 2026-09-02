@@ -78,3 +78,13 @@ The production kernel can also run as a deterministic combat replay without a
 rendered scene. See
 [`PERFORMANCE_BASELINES.md`](../docs/PERFORMANCE_BASELINES.md#production-combat-replay)
 for the explicit fixture CLI and report contract.
+
+## License
+
+Ashvault-authored code, game content, assets, and documentation are available
+under the [PolyForm Noncommercial License 1.0.0](../LICENSE). Commercial use is
+not granted.
+
+Third-party software, assets, trademarks, and research material retain their
+own terms and are not relicensed by Ashvault. See
+[`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
