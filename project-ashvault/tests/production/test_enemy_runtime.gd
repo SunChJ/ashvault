@@ -249,8 +249,9 @@ func _test_120_enemy_replay_uses_compact_state() -> void:
 	_assert_equal(left.state_hash(), right.state_hash(), "Density replay depends on input order.")
 	_assert_equal(
 		left.state_hash(),
-		"b627c45871f7f086d5fda902703cec4745ea9d60a3fe047771d24a4f357964ec",
-		"Enemy state hash contract changed."
+		"e2772aa8f85a9348dd1a607d3e43447701457647203efd6dba6674a578228b67",
+		"Enemy state hash contract changed. Positions: %s."
+		% JSON.stringify(_entity_positions(left))
 	)
 
 
@@ -375,6 +376,14 @@ func _kill_sources(result: RefCounted) -> Array:
 	var values: Array = []
 	for event: RefCounted in _kill_events(result):
 		values.append(event.source_entity_id())
+	return values
+
+
+func _entity_positions(world: RefCounted) -> Array:
+	var values: Array = []
+	for runtime_id in range(1, 122):
+		var position: Vector2 = world.entity_state(runtime_id).position()
+		values.append([runtime_id, position.x, position.y])
 	return values
 
 

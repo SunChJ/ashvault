@@ -34,7 +34,7 @@ intent: M2-06/content composition converts an attack ID into the same
 and speed. Its existing resolver delegates to the parameterized form, preserving
 the frozen player movement contract. Enemy movement stops at attack range and
 uses the same continuous bounds/obstacle sweeps.
-Enemy positions are quantized to `0.000001` world units at their authoritative
+Enemy positions are quantized to `0.001` world units at their authoritative
 commit boundary so platform-specific vector normalization tails cannot enter or
 accumulate in replay state.
 
