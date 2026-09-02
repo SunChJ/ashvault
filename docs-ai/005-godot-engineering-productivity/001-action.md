@@ -4,7 +4,7 @@
 
 | Date | Change | Ref |
 | --- | --- | --- |
-| 2026-09-02 | Established the project engineering-productivity policy and agent rules. | Pending |
+| 2026-09-02 | Established the project engineering-productivity policy and agent rules. | #76, `0a076dd` |
 
 ## Outcome & current state (as of 2026-09-02)
 

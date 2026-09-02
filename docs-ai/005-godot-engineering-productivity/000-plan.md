@@ -4,7 +4,7 @@
 | --- | --- |
 | **Status** | Implemented |
 | **Anchor date** | 2026-09-02 |
-| **Primary refs** | Pending |
+| **Primary refs** | #76, `0a076dd` |
 | **Related** | [`DEVELOPMENT_TASKBOOK.md`](../../docs/DEVELOPMENT_TASKBOOK.md), [`AGENTS.md`](../../AGENTS.md) |
 
 ## Background
