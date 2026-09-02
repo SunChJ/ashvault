@@ -173,6 +173,11 @@ class ProductionBoundaryTests(unittest.TestCase):
             ".tscn",
             "process_frame",
             "physics_frame",
+            "PhysicsServer",
+            "Area2D",
+            "CharacterBody2D",
+            "RayCast2D",
+            "ShapeCast2D",
         )
         violations: list[str] = []
         for path in sorted((PRODUCTION_ROOT / "simulation").rglob("*.gd")):
