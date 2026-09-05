@@ -497,7 +497,11 @@ fixture. Reproduce all six captures with:
   --script res://tests/production/test_stormweaver_abilities.gd
 ```
 
-HUD, visual/audio captures, and readability remain M2-07/M2-08 work.
+The default combat arena integrates the HUD, six ability inputs, bounded visual
+and audio feedback, and camera intensity. See the
+[presentation guide](../project-ashvault/game/presentation/README.md) for seeded
+12/120-enemy captures and presentation-disabled determinism checks. Elite
+telegraphs are presentation fixtures until M4 supplies authoritative attacks.
 
 ## 10. Items and rarity semantics
 

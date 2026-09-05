@@ -187,6 +187,11 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             + ["--script", "res://tests/production/test_combat_hud.gd"],
         ),
         TestCommand(
+            "production-combat-feedback",
+            godot_base
+            + ["--script", "res://tests/production/test_combat_feedback.gd"],
+        ),
+        TestCommand(
             "production-headless-simulation",
             godot_base
             + ["--script", "res://tests/production/test_headless_simulation.gd"],

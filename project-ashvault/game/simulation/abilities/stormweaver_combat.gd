@@ -307,7 +307,8 @@ func _step(commands: Array, interruptions: Array) -> String:
 			damage.committed_amount(), damage.is_critical()])
 	_last_report = {"tick": next_tick, "released_slot": release_slot, "hits": hit_records,
 		"damage": damage_records, "statuses": _statuses.active_values(), "events": event_records,
-		"active_deliveries": _delivery.active_count(), "state_hash": state_hash()}
+		"active_deliveries": _delivery.active_count(), "deliveries": _delivery.active_values(),
+		"state_hash": state_hash()}
 	return ""
 
 

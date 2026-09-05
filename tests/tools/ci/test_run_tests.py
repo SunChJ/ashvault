@@ -62,6 +62,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-enemy-runtime",
                 "production-stormweaver-abilities",
                 "production-combat-hud",
+                "production-combat-feedback",
                 "production-headless-simulation",
                 "headless-simulation-cli",
                 "simulation-report-schema",

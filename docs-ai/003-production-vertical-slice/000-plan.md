@@ -137,3 +137,5 @@ ceiling.
   [017-stormweaver-abilities.md](017-stormweaver-abilities.md).
 - Updated 2026-09-05: M2 adds snapshot-driven combat HUD and live InputMap
   binding labels — see [018-combat-hud.md](018-combat-hud.md).
+- Updated 2026-09-05: M2 assembles a playable arena and bounded combat feedback
+  with density captures — see [019-combat-feedback.md](019-combat-feedback.md).
