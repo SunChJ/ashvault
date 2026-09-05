@@ -523,8 +523,11 @@ UID creation belongs to the simulation boundary. Copies retain definition IDs
 but never reuse UIDs. The implemented
 [item contracts](../project-ashvault/game/simulation/items/README.md) define
 namespace/counter allocation, immutable instance records, and validated JSON
-snapshots. Affix generation, inventory ownership, and SaveGameV1 build on this
-boundary in later M3 tasks.
+snapshots. The implemented
+[affix rules](../project-ashvault/game/simulation/items/AFFIX_GENERATION.md) add
+frozen tier Resources, rarity budgets, base/slot/group/exclusion validation, and
+transactional loot-RNG generation. Inventory ownership and SaveGameV1 build on
+this boundary in later M3 tasks.
 
 The slice uses these generation rules:
 

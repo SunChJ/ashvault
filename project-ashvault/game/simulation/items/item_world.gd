@@ -45,7 +45,7 @@ func create_item(definition_id: String, fields: Dictionary = {}) -> Dictionary:
 	record.merge(fields, true)
 	record.uid = "%s:%d" % [_namespace, _next_sequence]
 	record.definition_id = definition_id
-	var error := Instance.validation_error(record, definition)
+	var error: String = _catalog.validate_record(record)
 	if not error.is_empty():
 		return _failure(error)
 	var item := Instance.new()
@@ -96,7 +96,7 @@ func restore(value: Variant) -> String:
 		var definition: Resource = _catalog.get_definition(record.definition_id)
 		if definition == null:
 			return "Item record references an unknown definition."
-		var error := Instance.validation_error(record, definition)
+		var error: String = _catalog.validate_record(record)
 		if not error.is_empty():
 			return error
 		var prefix := _namespace + ":"
@@ -126,3 +126,7 @@ static func _parse_sequence(value: Variant) -> int:
 
 static func _failure(error: String) -> Dictionary:
 	return {"item": null, "error": error}
+
+
+func item_catalog() -> RefCounted:
+	return _catalog
