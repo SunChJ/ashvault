@@ -526,8 +526,11 @@ namespace/counter allocation, immutable instance records, and validated JSON
 snapshots. The implemented
 [affix rules](../project-ashvault/game/simulation/items/AFFIX_GENERATION.md) add
 frozen tier Resources, rarity budgets, base/slot/group/exclusion validation, and
-transactional loot-RNG generation. Inventory ownership and SaveGameV1 build on
-this boundary in later M3 tasks.
+transactional loot-RNG generation.
+[EquipmentState](../project-ashvault/game/simulation/items/EQUIPMENT.md) applies
+eight-slot transactions and resolves base, affix, and numeric set contributions
+through StatResolver before publishing. Inventory ownership and SaveGameV1
+build on this boundary in later M3 tasks.
 
 The slice uses these generation rules:
 

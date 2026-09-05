@@ -50,6 +50,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-content-catalog",
                 "production-items",
                 "production-affix-generation",
+                "production-equipment",
                 "production-performance-metrics",
                 "production-rng-streams",
                 "production-stats",

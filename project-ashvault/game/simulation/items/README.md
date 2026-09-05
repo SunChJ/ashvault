@@ -32,6 +32,9 @@ Instances expose identity getters and defensive `snapshot()` copies; their
 underscore initializer and backing data are internal to the simulation module.
 Future crafting replaces validated records through world-owned operations.
 
+Eight-slot equipment, atomic swaps, and stat aggregation are implemented in
+the [equipment guide](EQUIPMENT.md).
+
 Rarity/affix publication and generation are implemented in the
 [affix generation guide](AFFIX_GENERATION.md). ItemCatalog accepts a published
 AffixCatalog as its optional third load argument; an omitted catalog is empty.
@@ -52,9 +55,9 @@ AffixCatalog as its optional third load argument; an omitted catalog is empty.
 
 Affix/roll/socket collections default to empty. The affix catalog and rarity
 rules validate lookup, counts, groups, exclusions, slots/bases, tiers, levels,
-and numeric bounds on creation and restoration. M3-03 supplies equipment-slot
-semantics; M3-06 supplies crafting rules and rune lookup. The current checks do
-not implement equipment transactions or crafting semantics.
+and numeric bounds on creation and restoration. EquipmentState supplies eight-slot
+compatibility and atomic stat aggregation; M3-06 supplies crafting rules and
+rune lookup. Inventory ownership and crafting remain separate contracts.
 Metadata permits null, booleans, strings, finite safe numbers, arrays, and
 string-keyed dictionaries. It rejects Resources, Nodes, other engine Variants,
 cycles/excessive depth, and integers outside ±(2^53−1). Limits are eight nesting

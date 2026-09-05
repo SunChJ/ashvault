@@ -30,8 +30,9 @@ always adds at least one. Every attached affix has exactly one numeric roll.
 `targeted_reroll_weight()` returns 1 for blue, 2 for other affixed rarities, and
 -1 for white/unknown. M3-06 owns actual crafting eligibility, currency cost, and
 transactions. Source/interaction/rule/set IDs are authored contracts; actual
-drop tables, equipment effects, and set activation at 2/3/4 pieces belong to
-later milestones. Metadata never supplies these mechanics.
+drop tables, named ability effects belong to later milestones. Numeric
+equipment effects and set activation at 2/3/4 pieces are implemented in
+[EquipmentState](EQUIPMENT.md). Metadata never supplies these mechanics.
 
 ## Authored resources and publication
 
@@ -48,7 +49,8 @@ level gate and rarity ceiling must both allow a roll. Fixed affixes use their
 highest eligible tier; random affixes select uniformly among eligible tiers.
 Numeric values use one integer draw over 1,000,001 interpolation positions,
 round to 1e-6, and clamp to authored bounds. Constant bounds consume no value
-draw. These are numeric affix records; M3-03 owns their stat application.
+draw. Affix operation/condition/priority/conversion-target fields now map these
+values into shared StatModifiers; see the [equipment guide](EQUIPMENT.md).
 
 `AffixCatalog` validates at most 128 definitions (the slice budget is 36),
 including exclusion references and nested tiers, before shared ContentCatalog
