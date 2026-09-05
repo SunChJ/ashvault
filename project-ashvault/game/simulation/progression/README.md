@@ -4,7 +4,8 @@ CharacterProgression belongs to the character lifetime, outside transient run
 state. It stores cumulative experience, skill/passive allocations, revision, and
 one XP sequence watermark per run. Level and available points are derived;
 callers cannot edit them independently. Snapshot/restore carries progression
-between runs; SaveGameV1 owns durable file I/O and migrations in the next task.
+between runs; [SaveGameV1](../../infrastructure/save/README.md) owns durable file I/O, backup
+recovery, and migrations.
 
 ## Authored content
 

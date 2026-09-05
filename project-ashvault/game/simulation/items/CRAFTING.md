@@ -49,7 +49,8 @@ Salvage leaves its immutable record in ItemWorld as evidence and marks the UID
 location `consumed`; it cannot be reclaimed by setup, moved, equipped, sold, or
 salvaged again. Materials and item location commit together. This is a tombstone,
 not an inventory slot. Inventory observation schema 2 adds owner material
-wallets; validated save import remains SaveGameV1 work.
+wallets; [SaveGameV1](../../infrastructure/save/README.md) validates and restores
+these wallets and consumed locations.
 
 ## Runes, words, and stats
 
@@ -88,4 +89,4 @@ equipped targets, immutable old references, quality/socket limits, blue costs,
 fixed-affix protection, seeded rerolls, native rune loading, order/base/rarity
 eligibility, crafted record restore, and equipment aggregation. Seed 929 yields
 `3.550166` after 20 blue rerolls. Final six-rune/three-word content, economy tuning,
-crafting UI, rune extraction, affix replacement, and save import are downstream.
+crafting UI, rune extraction, and affix replacement are downstream.

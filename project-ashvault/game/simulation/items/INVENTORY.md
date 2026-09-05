@@ -60,7 +60,8 @@ ownership store. Default standalone LootState creates its own inventory; compose
 gameplay must inject the shared instance. Existing register/resize/pickup helpers
 delegate to it. Loot observation schema 2 embeds the inventory snapshot instead
 of the former compact bags dictionary. There are no shipped saves using the old
-observation schema; validated import and migration remain SaveGameV1 work.
+observation schema; [SaveGameV1](../../infrastructure/save/README.md) reconstructs validated inventory
+and equipment in fresh state.
 
 `GlootInventoryView.items(slots, world)` creates detached GLoot InventoryItem
 values with UID, slot index, name, definition, rarity, and stack limit one. UI
@@ -82,3 +83,7 @@ immutable item records, defensive observations, and detached GLoot mutation.
 
 [Crafting](CRAFTING.md) adds owner material wallets (inventory schema 2), atomic
 bag-item recipes, and consumed UID tombstones for salvage.
+
+`restore` accepts only configured unused state, stages every container and
+equipment record, checks all saved locations against actual slots, and requires
+exactly one location per ItemWorld UID before publishing.

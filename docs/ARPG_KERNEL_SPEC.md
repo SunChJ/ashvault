@@ -585,6 +585,12 @@ A failed primary save attempts the backup and reports recovery. Missing content
 references are errors during development; release policy must be explicit before
 content removal. Migrations are forward-only and individually tested.
 
+The implemented [SaveGameV1 contract](../project-ashvault/game/infrastructure/save/README.md)
+uses an exact-payload SHA-256 envelope, fresh simulation reconstruction, and
+verified temporary/backup replacement. It currently persists a single-character
+checkpoint, including inventory ownership and loot receipts; transient combat
+resumption and future dungeon state are outside this first schema.
+
 ## 12. Headless simulator and observability
 
 The simulator accepts a build definition, encounter definition, seeds,

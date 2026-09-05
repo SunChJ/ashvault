@@ -9,6 +9,7 @@ const Table = preload("res://game/simulation/items/loot_table.gd")
 const Instance = preload("res://game/simulation/items/item_instance.gd")
 const Id = preload("res://game/content/stable_id.gd")
 
+var _used := false
 var _world: RefCounted
 var _streams: RefCounted
 var _creator_id := ""
@@ -89,6 +90,7 @@ func drop(creator_id: String, occurrence_id: String, source_id: String, table_id
 	# All fallible validation and item allocation precede the ownership/RNG commit.
 	errors = _streams.restore(staged.snapshot())
 	assert(errors.is_empty(), "Generated RNG must remain valid.")
+	_used = true
 	_receipts[occurrence_id] = receipt
 	if not item.is_empty():
 		var reservation_error: String = _inventory.reserve_drop(creator_id, owner_id, item.uid)
@@ -131,3 +133,70 @@ static func _valid_id(value: String) -> bool:
 
 static func _failure(error: String) -> Dictionary:
 	return {"error": error, "receipt": {}}
+
+
+func restore(value: Variant) -> String:
+	if _world == null or _used:
+		return "Loot restore requires configured unused state."
+	if not Ownership._fields(value, ["schema_version", "creator_id", "receipts", "ground"]) or value.schema_version != 2 or value.creator_id != _creator_id or not value.receipts is Dictionary or not value.ground is Dictionary:
+		return "Invalid loot restore sections or creator."
+	var receipts: Dictionary = {}
+	var drops: Dictionary = {}
+	var ground: Dictionary = {}
+	for occurrence: Variant in value.receipts:
+		var data: Variant = value.receipts[occurrence]
+		if not occurrence is String or not _valid_id(occurrence) or not Ownership._fields(data, ["occurrence_id", "creator_id", "owner_id", "source_id", "table_id", "entry_id", "item_level", "draw", "total_weight", "item"]):
+			return "Invalid drop receipt fields."
+		for field: String in ["occurrence_id", "creator_id", "owner_id", "source_id", "table_id", "entry_id"]:
+			if not data[field] is String:
+				return "Drop identities must be strings."
+		var table: Resource = _tables.get(data.table_id)
+		if data.occurrence_id != occurrence or data.creator_id != _creator_id or not _inventory.has_owner(data.owner_id) or table == null or table.source_id != data.source_id or not Instance._integer(data.item_level, 1) or data.item_level > 2147483647 or not data.item is Dictionary:
+			return "Invalid drop source, owner, table, level, or item."
+		var total := 0
+		for entry: Resource in table.entries:
+			total += entry.weight
+		if not Instance._integer(data.total_weight, 0) or data.total_weight != total or not Instance._integer(data.draw, -1) or (total == 0 and data.draw != -1) or (total > 0 and (data.draw < 0 or data.draw >= total)):
+			return "Drop selection evidence does not match the table."
+		var selected: Resource
+		var cumulative := 0
+		for entry: Resource in table.entries:
+			cumulative += entry.weight
+			if data.draw >= 0 and data.draw < cumulative:
+				selected = entry
+				break
+		if data.entry_id != ("" if selected == null else selected.entry_id):
+			return "Drop entry does not match its selection draw."
+		if selected == null or selected.definition_id.is_empty():
+			if not data.item.is_empty():
+				return "No-drop receipt cannot contain an item."
+		else:
+			var error: String = _world.item_catalog().validate_record(data.item)
+			if not error.is_empty():
+				return error
+			var item: RefCounted = _world.get_item(data.item.uid)
+			if item == null or drops.has(data.item.uid) or item.definition_id() != selected.definition_id or data.item.definition_id != selected.definition_id or data.item.rarity != selected.rarity or data.item.item_level != data.item_level:
+				return "Drop UID or generated provenance is inconsistent."
+			drops[data.item.uid] = occurrence
+			var location: Dictionary = _inventory.location(data.item.uid)
+			if location.get("container") == "ground":
+				if location.holder_id != data.owner_id:
+					return "Reserved ground owner disagrees with receipt."
+				ground[data.item.uid] = occurrence
+		var normalized: Dictionary = data.duplicate(true)
+		for field: String in ["item_level", "draw", "total_weight"]:
+			normalized[field] = int(normalized[field])
+		if not normalized.item.is_empty():
+			var original := Instance.new()
+			original._initialize(normalized.item)
+			normalized.item = original.snapshot()
+		receipts[occurrence] = normalized
+	if ground != value.ground:
+		return "Ground receipt index disagrees with inventory."
+	for uid: String in _inventory.snapshot().locations:
+		if _inventory.location(uid).container == "ground" and not ground.has(uid):
+			return "Ground UID has no source receipt."
+	_receipts = receipts
+	_drops = drops
+	_used = true
+	return ""
