@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[node name="AbilitySlot" type="PanelContainer"]
+custom_minimum_size = Vector2(200, 134)
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+mouse_filter = 2
+
+[node name="Binding" type="Label" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "LMB"
+mouse_filter = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="AbilityName" type="Label" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Arc Bolt"
+
+[node name="Availability" type="Label" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Ready"
+
+[node name="Cooldown" type="ProgressBar" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+max_value = 1.0
+show_percentage = false
+mouse_filter = 2

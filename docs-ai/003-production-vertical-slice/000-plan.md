@@ -135,3 +135,5 @@ ceiling.
 - Updated 2026-09-05: M2 composes six authored Stormweaver abilities through
   shared cast, delivery, status, and damage contracts — see
   [017-stormweaver-abilities.md](017-stormweaver-abilities.md).
+- Updated 2026-09-05: M2 adds snapshot-driven combat HUD and live InputMap
+  binding labels — see [018-combat-hud.md](018-combat-hud.md).
