@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/simulation/items/item_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+content_id = "item.training_wand"
+display_name = "Training Wand"
+equipment_slot = "slot.weapon"
+max_sockets = 2

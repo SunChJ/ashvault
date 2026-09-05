@@ -139,3 +139,4 @@ ceiling.
   binding labels — see [018-combat-hud.md](018-combat-hud.md).
 - Updated 2026-09-05: M2 assembles a playable arena and bounded combat feedback
   with density captures — see [019-combat-feedback.md](019-combat-feedback.md).
+- Updated 2026-09-05: Establish immutable item definitions, simulation-owned instance UIDs, and plain-data snapshots — see [020-item-instances.md](020-item-instances.md).

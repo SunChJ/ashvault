@@ -48,6 +48,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "m0-contract-freeze",
                 "production-identity-contracts",
                 "production-content-catalog",
+                "production-items",
                 "production-performance-metrics",
                 "production-rng-streams",
                 "production-stats",
