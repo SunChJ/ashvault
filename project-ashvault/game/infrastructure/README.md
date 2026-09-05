@@ -18,3 +18,7 @@ wall-clock measurements gathered by `PerformanceMetrics`.
 
 [SaveGameV1](save/README.md) owns plain checkpoint DTOs, fresh simulation
 reconstruction, forward migration, verified file replacement, and backup recovery.
+
+[Build simulation](headless/README.md) loads exact or constrained equipment, runs
+the four Stormweaver skill profiles, and emits candidate comparisons plus a
+machine-checkable rarity-value gate.

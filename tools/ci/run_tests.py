@@ -127,6 +127,10 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             godot_base + ["--script", "res://tests/production/test_affix_generation.gd"],
         ),
         TestCommand(
+            "production-build-simulation",
+            godot_base + ["--script", "res://tests/production/test_build_simulation.gd"],
+        ),
+        TestCommand(
             "production-save-game",
             godot_base + ["--script", "res://tests/production/test_save_game.gd"],
         ),
@@ -227,6 +231,13 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             "production-headless-simulation",
             godot_base
             + ["--script", "res://tests/production/test_headless_simulation.gd"],
+        ),
+        TestCommand(
+            "reference-builds-cli",
+            godot_base + [
+                "--script", "res://tools/simulation/run_reference_builds.gd", "--",
+                "--output", str(repository_root / ".artifacts" / "simulation" / "ci-builds.json"),
+            ],
         ),
         TestCommand(
             "headless-simulation-cli",

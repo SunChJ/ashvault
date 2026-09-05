@@ -147,3 +147,5 @@ ceiling.
 - Updated 2026-09-05: Plan deterministic crafting, immutable record replacement, and ordered rune effects — see [025-crafting-transactions.md](025-crafting-transactions.md).
 - Updated 2026-09-05: Plan character-lifetime XP, validated skill/passive allocation, and explicit respec — see [026-character-progression.md](026-character-progression.md).
 - Updated 2026-09-05: Plan SaveGameV1 validation, migration, atomic replacement, and backup recovery — see [027-save-game-v1.md](027-save-game-v1.md).
+
+- Updated 2026-09-05: Plan Build loadout simulation and rarity-value evidence — see [028-build-simulation.md](028-build-simulation.md).

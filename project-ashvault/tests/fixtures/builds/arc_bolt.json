@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "build_id": "build.reference.arc_bolt",
+  "skills": {
+    "arc_bolt": 5
+  },
+  "rotation": [
+    {
+      "tick": 1,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 21,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 41,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 61,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 81,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 101,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 121,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 141,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 161,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 181,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 201,
+      "skill": "arc_bolt"
+    },
+    {
+      "tick": 221,
+      "skill": "arc_bolt"
+    }
+  ],
+  "duration_ticks": 240,
+  "root_seed": 42,
+  "loadout": {
+    "slot.weapon": {
+      "uid": "profile.reference:1"
+    }
+  },
+  "conditions": [],
+  "objective": "damage",
+  "base_stats": {
+    "stat.offense.power": 10,
+    "stat.critical.chance": 0.2,
+    "stat.critical.multiplier": 1.5,
+    "stat.defense.armor": 0
+  }
+}

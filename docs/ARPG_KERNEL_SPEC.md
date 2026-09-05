@@ -610,6 +610,15 @@ simulator publishes its deterministic replay and combat fields through the
 separate `simulation-report.schema.json` contract, while reusing the same
 `PerformanceMetrics` aggregation for observed tick measurements.
 
+M3 adds a separate [Build V1 comparison contract](../project-ashvault/game/infrastructure/headless/README.md).
+It resolves exact UIDs or base/affix/rarity constraints against published items,
+executes the actual Stormweaver skill paths with equipment-derived player stats,
+and compares single-slot candidates in a fixed seeded arena. Reports retain
+metrics, item provenance, rarity composition, and state hashes. The four-profile
+regression gate requires blue/gold/green/purple best-slot evidence and rejects
+red/set dominance, including ties. This bounded candidate-pool gate does not
+replace M5's final content authoring, progression budgets, or full-encounter tuning.
+
 M1 closes only when `kernel-gate-v1.json` accepts the current report and its
 archived Apple M1 Pro reference capture. The two-entity fixture has an 8 ms
 portable P95 smoke bound and a 1 ms M1 Pro P95 reference bound. These detect
