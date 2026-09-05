@@ -127,6 +127,10 @@ def build_commands(godot: Path, repository_root: Path) -> list[TestCommand]:
             godot_base + ["--script", "res://tests/production/test_affix_generation.gd"],
         ),
         TestCommand(
+            "production-progression",
+            godot_base + ["--script", "res://tests/production/test_progression.gd"],
+        ),
+        TestCommand(
             "production-crafting",
             godot_base + ["--script", "res://tests/production/test_crafting.gd"],
         ),

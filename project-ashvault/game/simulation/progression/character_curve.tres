@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ProgressionDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/simulation/progression/progression_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+xp_thresholds = Array[int]([0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500, 6600, 7800, 9100, 10500, 12000, 13600, 15300, 17100, 19000])
+points_per_level = 1
+max_skill_rank = 20
