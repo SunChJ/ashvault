@@ -47,5 +47,47 @@ Capture normal, unavailable, casting, cooldown, and status states with a rendere
   --capture-dir "$PWD/.artifacts/combat-hud"
 ```
 
-The HUD is a reusable presentation scene. Playable scene assembly and ability
-input dispatch remain integration work; these labels do not emit cast commands.
+The HUD is a reusable presentation scene. The combat arena composes it with
+the input adapter; HUD labels themselves do not emit cast commands.
+
+## Combat feedback
+
+`combat/CombatFeedback` receives snapshots and copied reports. It draws six
+ability signatures, live projectile/totem positions, persistent status markers,
+hit/protected/critical/player-hurt cues, and deaths. At most 96 transient effects
+and eight audio voices are active. Repeated same-target hit feedback is merged
+within a tick; priority effects can replace crowd effects. Player silhouette and
+elite warning geometry have independent drawing passes.
+
+Camera motion is a bounded presentation-only offset, clamped to intensity 0–1.
+Zero disables the offset immediately. Camera shake is excluded from mouse-to-
+world aim mapping. Audio can be muted immediately without touching simulation.
+An elite telegraph is an explicit demonstration event; the presentation does
+not implement elite attacks or resolve damage.
+
+The default scene is now `game/infrastructure/arena/combat_arena.tscn`, with a
+1920x1080 viewport and a 1280x720 initial window. Its controller owns the fixed
+simulation tick and input dispatch. WASD moves; the six HUD bindings cast;
+movement cancels interruptible casts, and Dash replaces them. F5 restarts.
+The numerical prototype remains directly runnable at
+`res://prototype/numerical_sketch.tscn`.
+
+```sh
+"$ASHVAULT_GODOT" --path project-ashvault
+"$ASHVAULT_GODOT" --headless --path project-ashvault \
+  --script res://tests/production/test_combat_feedback.gd
+```
+
+For a reproducible movie, create the output directory first, then run:
+
+```sh
+"$ASHVAULT_GODOT" --path project-ashvault --rendering-method gl_compatibility \
+  --write-movie "$PWD/.artifacts/combat-feedback/density.avi" --fixed-fps 60 -- \
+  --showcase --enemies 120 --ticks 480 \
+  --capture-tick 170 --capture-path "$PWD/.artifacts/combat-feedback/density.png"
+```
+
+Use `--enemies 12` for the representative encounter. Add
+`--presentation-disabled` to compare the final authoritative hash without the
+HUD, camera effects, drawing, or sound. `simulation_p95_us` is a separately
+reported observation, not part of the replay hash or the M5 performance gate.

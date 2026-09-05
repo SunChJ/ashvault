@@ -3,6 +3,8 @@ extends Node
 
 const PlayerCommandContract = preload("res://game/simulation/commands/player_command.gd")
 
+const CastBinding = preload("res://game/simulation/abilities/ability_cast_binding.gd")
+
 const MOVE_LEFT := "move_left"
 const MOVE_RIGHT := "move_right"
 const MOVE_UP := "move_up"
@@ -114,3 +116,74 @@ func commands_from_sample(
 
 static func _sample_error(message: String) -> Dictionary:
 	return {"commands": [], "error": message}
+
+
+# Combat samples include held movement every tick so cast-owned movement resets
+# cannot leave a still-held movement key suppressed after recovery.
+func combat_commands_from_sample(
+	tick: int,
+	actor: RefCounted,
+	loadout: RefCounted,
+	movement: Vector2,
+	mouse_position: Vector2,
+	pressed_slots: Array
+) -> Dictionary:
+	if not _is_configured or actor == null or actor.runtime_id() != _actor_id:
+		return _sample_error("Combat input requires the configured actor snapshot.")
+	if not movement.is_finite() or not mouse_position.is_finite() or tick <= 0:
+		return _sample_error("Combat input requires finite vectors and a positive tick.")
+	if not actor.is_alive():
+		return {"commands": [], "error": ""}
+	var phase: String = actor.cast_phase()
+	if phase == "cast.canceled" or (phase == "cast.recovering" and actor.recovery_ticks_remaining() <= 1):
+		phase = "cast.idle"
+	if phase == "cast.released":
+		phase = "cast.idle" if actor.recovery_ticks_remaining() == 0 else "cast.recovering"
+	var requested := -1
+	var candidates := pressed_slots.duplicate()
+	for value: Variant in candidates:
+		if not value is int or not loadout.has_slot(value):
+			return _sample_error("Combat input contains an unknown ability slot.")
+	candidates.sort()
+	if candidates.has(5):
+		candidates.erase(5)
+		candidates.push_front(5)
+	for slot: int in candidates:
+		var binding: RefCounted = loadout.binding(slot)
+		if actor.cooldown_ticks_remaining(slot) > 1 or actor.resource() < binding.ability().cost_amount():
+			continue
+		if phase == "cast.idle" or (
+			phase in ["cast.started", "cast.recovering"] and binding.cancels_active_cast()
+			and loadout.binding(actor.ability_slot()).allows_interruption("interrupt.ability_replaced")
+		):
+			requested = slot
+			break
+	var move := movement.limit_length(1.0)
+	var release_slot := -1
+	if requested >= 0:
+		move = Vector2.ZERO
+		if loadout.binding(requested).ability().cast_time_ticks() == 0:
+			release_slot = requested
+	elif phase in ["cast.started", "cast.recovering"]:
+		var binding: RefCounted = loadout.binding(actor.ability_slot())
+		if binding.movement_policy() == CastBinding.MovementPolicy.LOCK:
+			move = Vector2.ZERO
+		if phase == "cast.started" and actor.cast_ticks_remaining() <= 1 and (move.is_zero_approx() or binding.movement_policy() == CastBinding.MovementPolicy.ALLOW):
+			release_slot = actor.ability_slot()
+	var aim: Vector2 = actor.position().direction_to(mouse_position)
+	if aim.is_zero_approx():
+		aim = actor.aim_direction()
+	var specs: Array = [[PlayerCommandContract.MOVE, move, -1], [PlayerCommandContract.AIM, aim, -1]]
+	if requested >= 0:
+		specs.append([PlayerCommandContract.CAST_START, aim, requested])
+	if release_slot >= 0:
+		specs.append([PlayerCommandContract.CAST_RELEASE, aim, release_slot])
+	var commands: Array = []
+	for spec: Array in specs:
+		var command := PlayerCommandContract.new()
+		var error: String = command.configure(tick, _actor_id, spec[0], spec[1], spec[2], _next_client_sequence + commands.size())
+		if not error.is_empty():
+			return _sample_error(error)
+		commands.append(command)
+	_next_client_sequence += commands.size()
+	return {"commands": commands, "error": ""}
