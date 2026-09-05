@@ -15,3 +15,6 @@ depend on rendered frames.
 deterministic combat replay. It advances the production kernel without loading
 a scene and publishes deterministic combat/state evidence separately from
 wall-clock measurements gathered by `PerformanceMetrics`.
+
+[SaveGameV1](save/README.md) owns plain checkpoint DTOs, fresh simulation
+reconstruction, forward migration, verified file replacement, and backup recovery.

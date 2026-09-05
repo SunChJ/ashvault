@@ -8,6 +8,7 @@ const Instance = preload("res://game/simulation/items/item_instance.gd")
 const Id = preload("res://game/content/stable_id.gd")
 const MAX_CURRENCY := 2147483647
 
+var _restored := false
 var _world: RefCounted
 var _creator := ""
 var _owners: Dictionary = {}
@@ -313,3 +314,86 @@ func craft(creator_id: String, owner_id: String, bag_slot: int, expected: RefCou
 	assert(errors.is_empty(), "Validated crafting RNG must commit.")
 	var word: Resource = _world.item_catalog().crafting_catalog().active_word(planned.record)
 	return {"error": "", "uid": uid, "consumed": planned.consumed, "costs": planned.costs, "yields": planned.yields, "runeword_id": word.content_id if word != null and not planned.consumed else ""}
+
+
+func restore(value: Variant, registry: Variant, base_modifiers: Array = [], set_bonuses: Array = []) -> String:
+	if _world == null or _restored or not _owners.is_empty() or not _vendors.is_empty() or not _locations.is_empty() or not _equipment.is_empty():
+		return "Inventory restore requires configured unused state."
+	if not _fields(value, ["schema_version", "creator_id", "owners", "vendors", "locations", "equipment"]) or value.schema_version != 2 or not value.creator_id is String or value.creator_id != _creator:
+		return "Invalid inventory schema or creator."
+	for field: String in ["owners", "vendors", "locations", "equipment"]:
+		if not value[field] is Dictionary:
+			return "Inventory snapshot sections must be objects."
+	var staged := get_script().new() as RefCounted
+	staged.configure(_world, _creator)
+	for owner: Variant in value.owners:
+		var data: Variant = value.owners[owner]
+		if not owner is String or not _fields(data, ["bag", "stash", "currency", "materials"]) or not data.bag is Array or not data.stash is Array or not data.materials is Dictionary:
+			return "Invalid saved owner containers."
+		var error: String = staged.register_owner(_creator, owner, data.bag.size(), data.stash.size(), data.currency)
+		if error.is_empty():
+			error = staged.grant_materials(_creator, owner, data.materials)
+		if not error.is_empty():
+			return error
+		for container: String in ["bag", "stash"]:
+			for index in data[container].size():
+				var uid: Variant = data[container][index]
+				if not uid is String:
+					return "Container slots require string UIDs."
+				if not uid.is_empty():
+					error = staged.place_item(_creator, owner, container, index, uid)
+					if not error.is_empty():
+						return error
+	for vendor: Variant in value.vendors:
+		var data: Variant = value.vendors[vendor]
+		if not vendor is String or not _fields(data, ["stock", "prices"]) or not data.stock is Array or not data.prices is Dictionary:
+			return "Invalid vendor snapshot."
+		var error: String = staged.register_vendor(_creator, vendor, data.stock.size(), data.prices)
+		if not error.is_empty():
+			return error
+		for index in data.stock.size():
+			if not data.stock[index] is String:
+				return "Vendor slots require string UIDs."
+			if not data.stock[index].is_empty():
+				error = staged.place_item(_creator, vendor, "stock", index, data.stock[index])
+				if not error.is_empty():
+					return error
+	for owner: Variant in value.equipment:
+		if not owner is String:
+			return "Equipment owner must be a string."
+		var error: String = staged.configure_equipment(_creator, owner, registry, base_modifiers, set_bonuses)
+		if not error.is_empty():
+			return error
+		var result: Dictionary = staged._equipment[owner].restore(value.equipment[owner], 0)
+		if not result.error.is_empty():
+			return result.error
+		for slot: String in Equipment.SLOTS:
+			var uid: String = staged._equipment[owner].snapshot().slots[slot]
+			if uid.is_empty():
+				continue
+			if staged._locations.has(uid):
+				return "Equipped UID appears in another container."
+			staged._locations[uid] = {"holder_id": owner, "container": "equipment", "slot": slot}
+	for uid: Variant in value.locations:
+		var data: Variant = value.locations[uid]
+		if not uid is String or _world.get_item(uid) == null or not _fields(data, ["holder_id", "container", "slot"]) or not data.holder_id is String or not data.container is String:
+			return "Invalid saved UID location."
+		if data.container in ["ground", "consumed"]:
+			if not staged.has_owner(data.holder_id) or not Instance._integer(data.slot, -1) or data.slot != -1 or staged._locations.has(uid):
+				return "Invalid ground or consumed location."
+			staged._locations[uid] = _location(data.holder_id, data.container, -1)
+		var actual: Dictionary = staged.location(uid)
+		if actual.is_empty() or actual.holder_id != data.holder_id or actual.container != data.container or actual.slot != data.slot:
+			return "Saved location disagrees with container contents."
+	if staged._locations.size() != value.locations.size() or staged._locations.size() != _world.snapshot().items.size():
+		return "Every item UID must have exactly one saved location."
+	_owners = staged._owners
+	_vendors = staged._vendors
+	_locations = staged._locations
+	_equipment = staged._equipment
+	_restored = true
+	return ""
+
+
+static func _fields(value: Variant, fields: Array) -> bool:
+	return value is Dictionary and value.size() == fields.size() and value.has_all(fields)

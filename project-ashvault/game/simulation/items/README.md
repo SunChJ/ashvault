@@ -79,8 +79,9 @@ Successful restore retains existing identities and advances future allocation.
 It marks even an empty restored world as used; an active world cannot rewind
 its allocator by loading an older snapshot. Failed restore leaves it untouched.
 InventoryState prevents duplicate ownership across its containers and applies
-atomic transfers. Save-file I/O, migrations, and profile namespace creation
-belong to later M3 composition.
+atomic transfers. [SaveGameV1](../../infrastructure/save/README.md) supplies file I/O, validation,
+migration and fresh reconstruction. Profile namespace creation remains application
+composition.
 
 The installed GLoot `InventoryItem` is RefCounted, but its mutable generic
 prototype/property model and copy/serialization semantics do not implement this

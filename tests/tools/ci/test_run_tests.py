@@ -50,6 +50,7 @@ class CiTestRunnerTests(unittest.TestCase):
                 "production-content-catalog",
                 "production-items",
                 "production-affix-generation",
+                "production-save-game",
                 "production-progression",
                 "production-crafting",
                 "production-inventory",
