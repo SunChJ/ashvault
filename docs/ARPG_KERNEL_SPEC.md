@@ -537,6 +537,10 @@ pickup into bounded bags.
 shared ground/bag/stash/vendor/equipment locations and atomic price/currency
 transactions. GLoot receives detached presentation values; SaveGameV1 builds
 on these simulation-owned snapshots in a later M3 task.
+[Crafting](../project-ashvault/game/simulation/items/CRAFTING.md) adds deterministic
+material recipes, immutable same-UID replacement, salvage retirement, and
+white-base ordered runewords. Quality and rune effects use the shared equipment
+stat resolver.
 
 The slice uses these generation rules:
 

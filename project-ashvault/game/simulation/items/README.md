@@ -30,7 +30,8 @@ and allocate another UID. Failed operations consume no UID. Sequence
 `9223372036854775807` is the exhausted sentinel and is never allocated.
 Instances expose identity getters and defensive `snapshot()` copies; their
 underscore initializer and backing data are internal to the simulation module.
-Future crafting replaces validated records through world-owned operations.
+Crafting replaces validated records through ItemWorld.replace_item while
+retaining UID and old immutable references; InventoryState owns recipe costs.
 
 Eight-slot equipment, atomic swaps, and stat aggregation are implemented in
 the [equipment guide](EQUIPMENT.md).
@@ -50,14 +51,15 @@ AffixCatalog as its optional third load argument; an omitted catalog is empty.
 | `affixes` | Ordered, unique published `affix.*` IDs; at most four under rarity rules |
 | `rolls` | Ordered `{affix_id, tier, value}` records; exactly one per attached affix; eligible tier and bounded numeric value |
 | `sockets` | Ordered strings: empty socket `""` or stable `rune.*` ID, bounded by definition capacity (0–32) |
-| `quality` | Non-negative JSON-safe integer; default 0 |
+| `quality` | Integer 0–20; default 0 |
 | `metadata` | Optional JSON-only descriptive provenance; does not define mechanical behavior |
 
 Affix/roll/socket collections default to empty. The affix catalog and rarity
 rules validate lookup, counts, groups, exclusions, slots/bases, tiers, levels,
 and numeric bounds on creation and restoration. EquipmentState supplies eight-slot
-compatibility and atomic stat aggregation; M3-06 supplies crafting rules and
-rune lookup. Inventory ownership and crafting remain separate contracts.
+compatibility and atomic stat aggregation; CraftingCatalog supplies recipe
+policy, rune lookup, and ordered runewords. InventoryState owns atomic crafting
+costs and location changes.
 Metadata permits null, booleans, strings, finite safe numbers, arrays, and
 string-keyed dictionaries. It rejects Resources, Nodes, other engine Variants,
 cycles/excessive depth, and integers outside ±(2^53−1). Limits are eight nesting
@@ -103,3 +105,6 @@ occurrence receipts, and bounded exactly-once pickup.
 
 See [inventory transactions](INVENTORY.md) for shared UID locations, atomic
 bag/stash/vendor/equipment operations, and detached GLoot view values.
+
+See [crafting contracts](CRAFTING.md) for recipe policy, materials, immutable
+record replacement, and shared quality/rune/runeword effects.

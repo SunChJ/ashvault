@@ -79,3 +79,6 @@ Tests exercise exact-balance buy/sell, frozen prices, full containers, invalid
 slots, stale/duplicate UIDs, foreign ownership, insufficient currency and
 overflow, two-hand displacement, stat failure rollback, loot-to-stash transfer,
 immutable item records, defensive observations, and detached GLoot mutation.
+
+[Crafting](CRAFTING.md) adds owner material wallets (inventory schema 2), atomic
+bag-item recipes, and consumed UID tombstones for salvage.

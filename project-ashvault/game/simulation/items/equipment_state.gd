@@ -5,6 +5,7 @@ const World = preload("res://game/simulation/items/item_world.gd")
 const Registry = preload("res://game/simulation/stats/stat_registry.gd")
 const Resolver = preload("res://game/simulation/stats/stat_resolver.gd")
 const SetBonus = preload("res://game/simulation/items/equipment_set_bonus.gd")
+const StatModifierContract = preload("res://game/simulation/stats/stat_modifier.gd")
 const SLOTS := ["slot.weapon", "slot.off_hand", "slot.head", "slot.body", "slot.hands", "slot.feet", "slot.neck", "slot.ring"]
 
 var _world: RefCounted
@@ -78,15 +79,17 @@ func transact(changes: Dictionary, tick: int, active_conditions: PackedStringArr
 		if definition.equipment_slot != slot:
 			return _failure("Item is incompatible with the equipment slot.")
 		two_handed = two_handed or definition.two_handed
+		var record: Dictionary = item.snapshot()
 		var source := "equipment." + uid.replace(":", ".i")
 		for effect: Resource in definition.base_effects:
 			var source_id: String = source + "." + effect.effect_id
-			var built: Dictionary = effect.modifier(source_id)
+			var quality_scale: float = 1.0 + float(record.quality) / 100.0 if effect.operation in [StatModifierContract.Operation.BASE, StatModifierContract.Operation.FLAT] else 1.0
+			var built: Dictionary = effect.modifier(source_id, quality_scale)
 			sources[source_id] = {"uid": uid, "definition_id": definition.content_id, "effect_id": effect.effect_id}
 			if not built.error.is_empty():
 				return _failure(built.error)
 			modifiers.append(built.modifier)
-		for roll: Dictionary in item.snapshot().rolls:
+		for roll: Dictionary in record.rolls:
 			var affix: Resource = _world.item_catalog().affix_catalog().get_definition(roll.affix_id)
 			var source_id: String = source + "." + affix.content_id
 			var built: Dictionary = affix.modifier(roll.value, source_id)
@@ -94,6 +97,28 @@ func transact(changes: Dictionary, tick: int, active_conditions: PackedStringArr
 			if not built.error.is_empty():
 				return _failure(built.error)
 			modifiers.append(built.modifier)
+		var crafting: RefCounted = _world.item_catalog().crafting_catalog()
+		var contributions: Array = []
+		for index in record.sockets.size():
+			if record.sockets[index].is_empty():
+				continue
+			var rune: Resource = crafting.rune(record.sockets[index])
+			contributions.append({"id": "socket.p%d." % index + rune.content_id, "effects": rune.effects, "rune_id": rune.content_id})
+		var word: Resource = crafting.active_word(record)
+		if word != null:
+			contributions.append({"id": word.content_id, "effects": word.effects, "runeword_id": word.content_id})
+		for contribution: Dictionary in contributions:
+			for effect: Resource in contribution.effects:
+				var source_id: String = source + "." + contribution.id + "." + effect.effect_id
+				var built: Dictionary = effect.modifier(source_id)
+				if not built.error.is_empty():
+					return _failure(built.error)
+				var provenance: Dictionary = contribution.duplicate()
+				provenance.erase("effects")
+				provenance.uid = uid
+				provenance.effect_id = effect.effect_id
+				sources[source_id] = provenance
+				modifiers.append(built.modifier)
 		if not definition.set_id.is_empty():
 			if not _sets.has(definition.set_id):
 				return _failure("Equipped set has no registered bonuses.")

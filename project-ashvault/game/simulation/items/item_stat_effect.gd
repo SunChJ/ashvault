@@ -77,9 +77,9 @@ func validation_error() -> String:
 	return modifier("equipment.validation").error
 
 
-func modifier(source_id: String) -> Dictionary:
+func modifier(source_id: String, amount_multiplier: float = 1.0) -> Dictionary:
 	var result := Modifier.new()
-	var error: String = result.configure(stat_id, operation, amount, source_id, condition_id, priority, target_stat_id)
+	var error: String = result.configure(stat_id, operation, amount * amount_multiplier, source_id, condition_id, priority, target_stat_id)
 	return {"modifier": result if error.is_empty() else null, "error": error}
 
 

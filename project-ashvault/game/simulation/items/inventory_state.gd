@@ -1,6 +1,7 @@
 class_name InventoryState
 extends RefCounted
 
+const Recipe = preload("res://game/simulation/items/crafting_recipe.gd")
 const World = preload("res://game/simulation/items/item_world.gd")
 const Equipment = preload("res://game/simulation/items/equipment_state.gd")
 const Instance = preload("res://game/simulation/items/item_instance.gd")
@@ -38,7 +39,7 @@ func has_owner(owner_id: String) -> bool:
 func register_owner(creator_id: String, owner_id: String, bag_capacity: int, stash_capacity: int = 0, currency: Variant = 0) -> String:
 	if not authorized(creator_id) or not _id(owner_id) or has_owner(owner_id) or not _capacity(bag_capacity) or not _capacity(stash_capacity) or not _money(currency):
 		return "Invalid authority, owner, capacity, or initial currency."
-	_owners[owner_id] = {"bag": _slots(bag_capacity), "stash": _slots(stash_capacity), "currency": int(currency)}
+	_owners[owner_id] = {"bag": _slots(bag_capacity), "stash": _slots(stash_capacity), "currency": int(currency), "materials": {}}
 	return ""
 
 
@@ -195,7 +196,7 @@ func snapshot() -> Dictionary:
 	var equipment: Dictionary = {}
 	for owner: String in _equipment:
 		equipment[owner] = _equipment[owner].snapshot()
-	return {"schema_version": 1, "creator_id": _creator, "owners": _owners.duplicate(true), "vendors": _vendors.duplicate(true), "locations": _locations.duplicate(true), "equipment": equipment}
+	return {"schema_version": 2, "creator_id": _creator, "owners": _owners.duplicate(true), "vendors": _vendors.duplicate(true), "locations": _locations.duplicate(true), "equipment": equipment}
 
 
 func _trade(creator_id: String, owner_id: String, vendor_id: String, stock_slot: int, bag_slot: int, uid: String, buying: bool) -> String:
@@ -266,3 +267,49 @@ static func _money(value: Variant) -> bool:
 
 static func _id(value: String) -> bool:
 	return value.length() <= 128 and Id.is_valid(value)
+
+
+func grant_materials(creator_id: String, owner_id: String, amounts: Dictionary) -> String:
+	if not authorized(creator_id) or not has_owner(owner_id):
+		return "Material grants require authority and a registered owner."
+	var staged: Dictionary = _owners[owner_id].materials.duplicate()
+	for id: Variant in amounts:
+		if not id is String or not _world.item_catalog().crafting_catalog().material_known(id) or not _money(amounts[id]):
+			return "Materials require published IDs and bounded nonnegative integer counts."
+		if staged.get(id, 0) > MAX_CURRENCY - int(amounts[id]):
+			return "Material balance overflow."
+		staged[id] = staged.get(id, 0) + int(amounts[id])
+	_owners[owner_id].materials = staged
+	return ""
+
+
+func craft(creator_id: String, owner_id: String, bag_slot: int, expected: RefCounted, recipe: String, streams: Variant, target: String = "") -> Dictionary:
+	if not authorized(creator_id) or not has_owner(owner_id) or not expected is Instance:
+		return {"error": "Crafting requires authority, owner, and an expected item reference."}
+	var uid: String = expected.uid()
+	if _world.get_item(uid) != expected or location(uid) != _location(owner_id, "bag", bag_slot):
+		return {"error": "Crafting target is stale or not in the owner's bag slot."}
+	var planned: Dictionary = Recipe.plan(expected.snapshot(), _world.item_catalog(), streams, recipe, target)
+	if not planned.error.is_empty():
+		return planned
+	var materials: Dictionary = _owners[owner_id].materials.duplicate()
+	for id: String in planned.costs:
+		if materials.get(id, 0) < planned.costs[id]:
+			return {"error": "Insufficient crafting materials."}
+		materials[id] -= planned.costs[id]
+	for id: String in planned.yields:
+		if materials.get(id, 0) > MAX_CURRENCY - planned.yields[id]:
+			return {"error": "Crafting yield would overflow material capacity."}
+		materials[id] = materials.get(id, 0) + planned.yields[id]
+	if planned.consumed:
+		_owners[owner_id].bag[bag_slot] = ""
+		_locations[uid] = _location(owner_id, "consumed", -1)
+	else:
+		var replacement: Dictionary = _world.replace_item(expected, planned.record)
+		if not replacement.error.is_empty():
+			return {"error": replacement.error}
+	_owners[owner_id].materials = materials
+	var errors: PackedStringArray = streams.restore(planned.rng)
+	assert(errors.is_empty(), "Validated crafting RNG must commit.")
+	var word: Resource = _world.item_catalog().crafting_catalog().active_word(planned.record)
+	return {"error": "", "uid": uid, "consumed": planned.consumed, "costs": planned.costs, "yields": planned.yields, "runeword_id": word.content_id if word != null and not planned.consumed else ""}
