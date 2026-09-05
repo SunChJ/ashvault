@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RuneDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/simulation/items/rune_definition.gd" id="1"]
+[ext_resource type="Script" path="res://game/simulation/items/item_stat_effect.gd" id="2"]
+
+[sub_resource type="Resource" id="Power"]
+script = ExtResource("2")
+effect_id = "item_effect.spark"
+stat_id = "stat.power"
+amount = 2.0
+
+[resource]
+script = ExtResource("1")
+content_id = "rune.spark"
+effects = Array[Resource]([SubResource("Power")])

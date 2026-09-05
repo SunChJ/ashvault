@@ -28,9 +28,10 @@ remain structurally legal (the specification sets upper limits); generation
 always adds at least one. Every attached affix has exactly one numeric roll.
 
 `targeted_reroll_weight()` returns 1 for blue, 2 for other affixed rarities, and
--1 for white/unknown. M3-06 owns actual crafting eligibility, currency cost, and
-transactions. Source/interaction/rule/set IDs are authored contracts; actual
-drop tables, named ability effects belong to later milestones. Numeric
+-1 for white/unknown. [Crafting](CRAFTING.md) defines eligibility, shard cost, and
+transactions. Source/interaction/rule/set IDs are authored contracts;
+[loot tables](LOOT.md) enforce source identity while final named ability effects
+remain later content work. Numeric
 equipment effects and set activation at 2/3/4 pieces are implemented in
 [EquipmentState](EQUIPMENT.md). Metadata never supplies these mechanics.
 

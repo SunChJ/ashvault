@@ -130,3 +130,17 @@ static func _failure(error: String) -> Dictionary:
 
 func item_catalog() -> RefCounted:
 	return _catalog
+
+
+func replace_item(expected: RefCounted, record: Dictionary) -> Dictionary:
+	if not expected is Instance or get_item(expected.uid()) != expected:
+		return _failure("Replacement requires the current immutable item reference.")
+	if record.get("uid") != expected.uid() or record.get("definition_id") != expected.definition_id():
+		return _failure("Replacement cannot change item identity or definition.")
+	var error: String = _catalog.validate_record(record)
+	if not error.is_empty():
+		return _failure(error)
+	var item := Instance.new()
+	item._initialize(record)
+	_items[item.uid()] = item
+	return {"item": item, "error": ""}

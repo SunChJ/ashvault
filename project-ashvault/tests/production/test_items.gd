@@ -4,6 +4,7 @@ const Definition = preload("res://game/simulation/items/item_definition.gd")
 const Catalog = preload("res://game/simulation/items/item_catalog.gd")
 const World = preload("res://game/simulation/items/item_world.gd")
 const Affixes = preload("res://game/simulation/items/affix_catalog.gd")
+const Crafting = preload("res://game/simulation/items/crafting_catalog.gd")
 const Tags = preload("res://game/content/tag_registry.gd")
 
 var failures: Array[String] = []
@@ -19,7 +20,9 @@ func _run() -> void:
 	_check(affixes.load_definitions([load("res://tests/fixtures/items/power_affix.tres")]).is_empty(), "Authored affix/tier Resources must publish.")
 	var definition := load("res://tests/fixtures/items/training_wand.tres") as Resource
 	_check(definition is Definition, "Authored item must load as a native Resource.")
-	_check(catalog.load_definitions([definition], Tags.new(), affixes).is_empty(), "Item catalog must publish.")
+	var crafting := Crafting.new()
+	_check(crafting.load_definitions([load("res://tests/fixtures/items/spark_rune.tres")], []).is_empty(), "Socket fixture rune must publish.")
+	_check(catalog.load_definitions([definition], Tags.new(), affixes, crafting).is_empty(), "Item catalog must publish.")
 	definition.display_name = "Changed"
 	definition.max_sockets = 100
 	definition.content_id = "item.changed"
