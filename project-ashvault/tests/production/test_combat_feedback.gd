@@ -49,13 +49,19 @@ func _run() -> void:
 		var sound: AudioStreamWAV = Feedback.SOUNDS[name]
 		_check(sound.get_length() > 0.05 and sound.get_length() < 0.6, "Sound duration must be bounded: %s" % name)
 	_test_input_lifecycle()
-	# Flush deferred playback starts before testing immediate mute and teardown.
-	await process_frame
-	await process_frame
+	# AudioServer retires stopped streams asynchronously after a mixer cycle.
+	var playbacks: Array[WeakRef] = []
+	for voice: Node in feedback.get_children():
+		if voice is AudioStreamPlayer and voice.has_stream_playback():
+			playbacks.append(weakref(voice.get_stream_playback()))
 	feedback.set_audio_enabled(false)
 	_check(feedback.active_voice_count() == 0, "Muting must stop active voices immediately.")
 	feedback.queue_free()
-	await create_timer(0.05).timeout
+	var deadline := Time.get_ticks_msec() + 2000
+	while playbacks.any(func(playback: WeakRef) -> bool: return playback.get_ref() != null) and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(not playbacks.any(func(playback: WeakRef) -> bool: return playback.get_ref() != null), "Stopped audio playback must retire before teardown.")
+	await process_frame
 	if failures.is_empty():
 		print("Production combat feedback tests passed.")
 		quit(0)

@@ -53,7 +53,10 @@ The old numerical prototype remains runnable by explicit scene path.
 production/prototype fixtures, the headless report and kernel gate, performance
 baseline, and the default scene smoke test. The feedback fixture covers every
 cue, bounded effects/voices, zero camera motion, and cast/movement lifecycle.
-Headless teardown flushes deferred playback starts before testing mute/free.
+Headless teardown checks mute immediately, then waits for weak playback
+references to retire (with a two-second failure deadline). A fixed 50 ms wait
+proved intermittently shorter than asynchronous mixer cleanup during M3-01
+validation; frame boundaries alone did not guarantee release.
 
 Both 480-tick presentation-enabled and disabled fixtures match:
 
