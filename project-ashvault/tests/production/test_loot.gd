@@ -42,7 +42,8 @@ func _fixture(reverse: bool = false) -> Dictionary:
 	var tables: Array[Resource] = [_table("loot.mixed", entries), _table("loot.empty", []), preload("res://tests/fixtures/items/white_loot.tres"), _table("loot.blocked", [_entry("entry.blocked", "item.blocked", "green")])]
 	tables[3].source_id = "drop_source.blocked"
 	var loot := Loot.new()
-	_check(loot.configure(world, streams, "authority.local", tables).is_empty(), "Loot must configure.")
+	var configure_error: String = loot.configure(world, streams, "authority.local", tables)
+	_check(configure_error.is_empty(), "Loot must configure: " + configure_error)
 	_check(loot.register_owner("authority.local", "actor.player", 1).is_empty(), "Bounded bag must register.")
 	return {"loot": loot, "world": world, "streams": streams, "tables": tables}
 
@@ -106,7 +107,7 @@ func _run() -> void:
 	_check(f.tables[0].entries[0].weight != 999 and f.tables[0].source_id == "drop_source.fixture", "Published tables and entries must be frozen.")
 	_check(JSON.stringify(f.world.snapshot()).sha256_text() == "c3b67efdff6217a00a1b70fe10ec78a0e5a3028467fef97650367a179a735744", "Seeded loot fixture must retain its pinned item hash.")
 	var decoded: Dictionary = JSON.parse_string(JSON.stringify(before))
-	_check(decoded.ground == before.ground and decoded.bags["actor.player"].items == before.bags["actor.player"].items and decoded.receipts.size() == before.receipts.size(), "JSON evidence must preserve ground, bag, and occurrence identities.")
+	_check(decoded.ground == before.ground and decoded.inventory.owners["actor.player"].bag == before.inventory.owners["actor.player"].bag and decoded.receipts.size() == before.receipts.size(), "JSON evidence must preserve ground, bag, and occurrence identities.")
 	_test_invalid_tables()
 	_test_allocation_failure()
 	print(JSON.stringify({"fixture": "loot", "samples": 200, "no_drops": no_drops, "state_hash": JSON.stringify(f.world.snapshot()).sha256_text()}))
@@ -164,3 +165,4 @@ func _test_allocation_failure() -> void:
 func _check(condition: bool, message: String) -> void:
 	if not condition:
 		failures.append(message)
+		print(message)

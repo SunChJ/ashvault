@@ -14,7 +14,7 @@ not own authoritative simulation state.
 | [GdUnit4](https://github.com/godot-gdunit-labs/gdUnit4) | Cross-cutting | Scene, integration, mocks, and test reporting | Deferred; do not install. Existing deterministic contract gates remain authoritative. |
 | Limbo Console | M2/M3 | In-game developer commands and diagnostics | Preferred candidate; development-only adapters call validated APIs. |
 | Controller Icons | M2-07 | Automatic keyboard/controller prompts | Preferred candidate; presentation only. |
-| [Gloot 3.0.2](https://github.com/peter-kish/gloot) | M3 | Inventory, item, and equipment workflow | Installed; M3-01 keeps immutable definitions, UID allocation, and validated instance DTOs project-owned. GLoot inventory adapters follow in M3-05. |
+| [Gloot 3.0.2](https://github.com/peter-kish/gloot) | M3 | Inventory, item, and equipment workflow | Installed; M3-01 keeps immutable definitions, UID allocation, and validated instance DTOs project-owned. M3-05 adds detached GLoot InventoryItem views; InventoryState owns atomic bag/stash/vendor/equipment transactions. |
 | Better Terrain | M4 | TileMap terrain authoring | Evaluate when modular dungeon authoring begins. |
 | Dialogue Manager | M4 | NPC dialogue and branching text | Evaluate when narrative content enters production. |
 | Sentry Godot | Post-alpha | Crash, error, and release monitoring | Defer until consent, privacy, release-symbol, and environment policies exist. |

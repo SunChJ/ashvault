@@ -532,8 +532,11 @@ eight-slot transactions and resolves base, affix, and numeric set contributions
 through StatResolver before publishing.
 [LootState](../project-ashvault/game/simulation/items/LOOT.md) adds source-bound
 weighted tables, deterministic occurrence receipts, and atomic reserved-owner
-pickup into bounded bags. Stash/vendor transactions and SaveGameV1 build on
-this boundary in later M3 tasks.
+pickup into bounded bags.
+[InventoryState](../project-ashvault/game/simulation/items/INVENTORY.md) owns
+shared ground/bag/stash/vendor/equipment locations and atomic price/currency
+transactions. GLoot receives detached presentation values; SaveGameV1 builds
+on these simulation-owned snapshots in a later M3 task.
 
 The slice uses these generation rules:
 

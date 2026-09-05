@@ -76,8 +76,9 @@ sequences, matching namespaces, and a next sequence greater than every item.
 Successful restore retains existing identities and advances future allocation.
 It marks even an empty restored world as used; an active world cannot rewind
 its allocator by loading an older snapshot. Failed restore leaves it untouched.
-Save-file I/O, migrations, profile namespace creation, ownership transactions,
-and duplicate ownership across containers belong to later M3 composition.
+InventoryState prevents duplicate ownership across its containers and applies
+atomic transfers. Save-file I/O, migrations, and profile namespace creation
+belong to later M3 composition.
 
 The installed GLoot `InventoryItem` is RefCounted, but its mutable generic
 prototype/property model and copy/serialization semantics do not implement this
@@ -99,3 +100,6 @@ unknown definitions, malformed fields, and non-JSON metadata atomically.
 
 See [loot and pickup ownership](LOOT.md) for source-bound tables, deterministic
 occurrence receipts, and bounded exactly-once pickup.
+
+See [inventory transactions](INVENTORY.md) for shared UID locations, atomic
+bag/stash/vendor/equipment operations, and detached GLoot view values.

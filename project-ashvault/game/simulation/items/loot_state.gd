@@ -1,6 +1,7 @@
 class_name LootState
 extends RefCounted
 
+const Ownership = preload("res://game/simulation/items/inventory_state.gd")
 const World = preload("res://game/simulation/items/item_world.gd")
 const Streams = preload("res://game/simulation/random/rng_streams.gd")
 const Generator = preload("res://game/simulation/items/item_generator.gd")
@@ -12,16 +13,22 @@ var _world: RefCounted
 var _streams: RefCounted
 var _creator_id := ""
 var _tables: Dictionary = {}
-var _bags: Dictionary = {}
+var _inventory: RefCounted
 var _receipts: Dictionary = {}
-var _ground: Dictionary = {}
+var _drops: Dictionary = {}
 
 
-func configure(world: Variant, streams: Variant, creator_id: String, tables: Array) -> String:
+func configure(world: Variant, streams: Variant, creator_id: String, tables: Array, inventory: Variant = null) -> String:
 	if _world != null:
 		return "Loot state is already configured."
 	if not world is World or world.item_catalog() == null or not streams is Streams or not streams.is_initialized() or not _valid_id(creator_id):
 		return "Loot requires a published item world, initialized RNG, and stable creator ID."
+	var ownership: Variant = inventory
+	if ownership == null:
+		ownership = Ownership.new()
+		ownership.configure(world, creator_id)
+	if not ownership is Ownership or not ownership.matches(world, creator_id):
+		return "Loot requires inventory for the same item world and creator."
 	var staged: Dictionary = {}
 	for table: Variant in tables:
 		if not table is Table:
@@ -34,6 +41,7 @@ func configure(world: Variant, streams: Variant, creator_id: String, tables: Arr
 		staged[table.content_id] = table
 	for table: Resource in staged.values():
 		table.freeze()
+	_inventory = ownership
 	_world = world
 	_streams = streams
 	_creator_id = creator_id
@@ -42,21 +50,15 @@ func configure(world: Variant, streams: Variant, creator_id: String, tables: Arr
 
 
 func register_owner(creator_id: String, owner_id: String, capacity: int) -> String:
-	if not _authorized(creator_id) or not _valid_id(owner_id) or _bags.has(owner_id) or capacity < 0 or capacity > 10000:
-		return "Invalid authority, duplicate owner, or capacity outside 0–10000."
-	_bags[owner_id] = {"capacity": capacity, "items": []}
-	return ""
+	return _inventory.register_owner(creator_id, owner_id, capacity) if _authorized(creator_id) else "Invalid authority."
 
 
 func resize_bag(creator_id: String, owner_id: String, capacity: int) -> String:
-	if not _authorized(creator_id) or not _bags.has(owner_id) or capacity < _bags[owner_id].items.size() or capacity > 10000:
-		return "Invalid authority, owner, or capacity below contents or above 10000."
-	_bags[owner_id].capacity = capacity
-	return ""
+	return _inventory.resize_bag(creator_id, owner_id, capacity) if _authorized(creator_id) else "Invalid authority."
 
 
 func drop(creator_id: String, occurrence_id: String, source_id: String, table_id: String, owner_id: String, item_level: Variant) -> Dictionary:
-	if not _authorized(creator_id) or not _valid_id(occurrence_id) or _receipts.has(occurrence_id) or not _bags.has(owner_id):
+	if not _authorized(creator_id) or not _valid_id(occurrence_id) or _receipts.has(occurrence_id) or not _inventory.has_owner(owner_id):
 		return _failure("Invalid authority, occurrence, or reserved owner.")
 	var table: Resource = _tables.get(table_id)
 	if table == null or table.source_id != source_id or not Instance._integer(item_level, 1) or item_level > 2147483647:
@@ -89,30 +91,34 @@ func drop(creator_id: String, occurrence_id: String, source_id: String, table_id
 	assert(errors.is_empty(), "Generated RNG must remain valid.")
 	_receipts[occurrence_id] = receipt
 	if not item.is_empty():
-		_ground[item.uid] = occurrence_id
+		var reservation_error: String = _inventory.reserve_drop(creator_id, owner_id, item.uid)
+		assert(reservation_error.is_empty(), "Freshly allocated drop UID must reserve successfully.")
+		_drops[item.uid] = occurrence_id
 	return {"error": "", "receipt": receipt.duplicate(true)}
 
 
 func pickup(creator_id: String, owner_id: String, uid: String) -> String:
-	if not _authorized(creator_id) or not _bags.has(owner_id) or not _ground.has(uid):
+	if not _authorized(creator_id) or not _inventory.has_owner(owner_id) or not _drops.has(uid):
 		return "Invalid authority, owner, or ground UID."
-	var receipt: Dictionary = _receipts[_ground[uid]]
-	var bag: Dictionary = _bags[owner_id]
+	var receipt: Dictionary = _receipts[_drops[uid]]
 	if receipt.owner_id != owner_id or receipt.creator_id != creator_id:
 		return "Pickup must match the drop creator and reserved owner."
-	if bag.items.size() >= bag.capacity:
-		return "Inventory is full."
-	bag.items.append(uid)
-	_ground.erase(uid)
+	var error: String = _inventory.pickup(creator_id, owner_id, uid)
+	if not error.is_empty():
+		return error
 	return ""
 
 
 func bag_items(owner_id: String) -> PackedStringArray:
-	return PackedStringArray(_bags[owner_id].items) if _bags.has(owner_id) else PackedStringArray()
+	return _inventory.bag_items(owner_id) if _inventory != null else PackedStringArray()
 
 
 func snapshot() -> Dictionary:
-	return {"schema_version": 1, "creator_id": _creator_id, "bags": _bags.duplicate(true), "receipts": _receipts.duplicate(true), "ground": _ground.duplicate(true)}
+	var ground: Dictionary = {}
+	for uid: String in _drops:
+		if _inventory.location(uid).get("container") == "ground":
+			ground[uid] = _drops[uid]
+	return {"schema_version": 2, "creator_id": _creator_id, "inventory": {} if _inventory == null else _inventory.snapshot(), "receipts": _receipts.duplicate(true), "ground": ground}
 
 
 func _authorized(creator_id: String) -> bool:
