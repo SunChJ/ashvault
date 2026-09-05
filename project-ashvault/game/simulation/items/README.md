@@ -96,3 +96,6 @@ The focused fixture loads an authored Resource, verifies publication/freezing,
 creates 1002 distinct UIDs, checks deep copies and JSON restoration, continues
 allocation beyond 2^53, and rejects duplicate UIDs, counter overflow/rewinds,
 unknown definitions, malformed fields, and non-JSON metadata atomically.
+
+See [loot and pickup ownership](LOOT.md) for source-bound tables, deterministic
+occurrence receipts, and bounded exactly-once pickup.

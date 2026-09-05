@@ -529,8 +529,11 @@ frozen tier Resources, rarity budgets, base/slot/group/exclusion validation, and
 transactional loot-RNG generation.
 [EquipmentState](../project-ashvault/game/simulation/items/EQUIPMENT.md) applies
 eight-slot transactions and resolves base, affix, and numeric set contributions
-through StatResolver before publishing. Inventory ownership and SaveGameV1
-build on this boundary in later M3 tasks.
+through StatResolver before publishing.
+[LootState](../project-ashvault/game/simulation/items/LOOT.md) adds source-bound
+weighted tables, deterministic occurrence receipts, and atomic reserved-owner
+pickup into bounded bags. Stash/vendor transactions and SaveGameV1 build on
+this boundary in later M3 tasks.
 
 The slice uses these generation rules:
 

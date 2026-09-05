@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LootTable" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://game/simulation/items/loot_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://game/simulation/items/loot_entry.gd" id="2_entry"]
+
+[sub_resource type="Resource" id="Resource_white"]
+script = ExtResource("2_entry")
+entry_id = "entry.white"
+definition_id = "item.base"
+rarity = "white"
+weight = 1
+
+[resource]
+script = ExtResource("1_table")
+content_id = "loot.white"
+source_id = "drop_source.fixture"
+entries = Array[Resource]([SubResource("Resource_white")])
