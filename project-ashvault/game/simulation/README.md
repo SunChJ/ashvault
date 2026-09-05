@@ -178,3 +178,7 @@ EntityWorld remains the only authoritative position owner.
 See `docs/ARPG_KERNEL_SPEC.md` section 9.4 for authored values and tick ordering.
 The focused `tests/production/test_stormweaver_abilities.gd` suite emits JSON
 behavior captures and validates both combination and 120-enemy replay hashes.
+
+[Authored rooms](dungeon/README.md) provide immutable integer-grid bounds, typed
+connectors and encounter sockets, validation evidence, and pairwise placement
+checks. Seeded graph assembly and encounter spawning are separate downstream work.

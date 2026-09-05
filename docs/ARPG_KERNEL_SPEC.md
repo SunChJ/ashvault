@@ -624,6 +624,18 @@ archived Apple M1 Pro reference capture. The two-entity fixture has an 8 ms
 portable P95 smoke bound and a 1 ms M1 Pro P95 reference bound. These detect
 kernel regressions but do not satisfy the representative-density target below.
 
+### Authored room descriptors
+
+M4 uses [validated room Resources](../project-ashvault/game/simulation/dungeon/README.md)
+with integer-grid bounds, explicit roles, typed cardinal connectors, and encounter
+socket areas. Publication freezes nested values and emits versioned descriptor
+hashes. Presentation scenes consume these definitions without entering the
+simulation dependency graph. Pairwise placement requires opposite compatible
+openings, exact boundary alignment, and no overlap between room interiors.
+Reserved connector clearances and encounter sockets cannot overlap inside a room.
+Seeded graph assembly, navigation reachability, and encounter selection remain
+separate from this first authored-room contract.
+
 ## 13. Performance and compatibility targets
 
 The slice target is 1080p at 60 FPS with 120 live enemies and 500 projectiles.

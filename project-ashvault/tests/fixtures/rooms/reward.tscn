@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://game/presentation/dungeon/authored_room.gd" id="1_module"]
+[ext_resource type="Resource" path="res://tests/fixtures/rooms/reward.tres" id="2_definition"]
+
+[node name="RewardRoom" type="Node2D"]
+script = ExtResource("1_module")
+definition = ExtResource("2_definition")
+
+[node name="RoleLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 160.0
+offset_bottom = 42.0
+text = "Reward"
