@@ -558,6 +558,16 @@ The authored slice contains 24 ordinary bases, 6 green items, 8 purple items, 8
 red items, and 4 set pieces. Generated white, blue, and gold items reuse the 24
 bases. It also contains 36 affixes, 6 runes, and 3 runewords.
 
+### Character progression
+
+[CharacterProgression](../project-ashvault/game/simulation/progression/README.md)
+keeps lifetime XP, skill/passive allocations, and per-run XP sequence watermarks.
+Levels and available points derive from a frozen authored XP curve. Allocation
+requires earned points, level/prerequisite eligibility, and the current revision;
+only explicit respec removes allocations. Passive modifiers use StatResolver and
+skill ranks select existing AbilityDefinition milestones. Strict JSON restore
+rebuilds this state between runs; durable file persistence belongs to SaveGameV1.
+
 ## 11. Save contract
 
 `SaveGameV1` contains character, inventory, progression, world-run, settings,

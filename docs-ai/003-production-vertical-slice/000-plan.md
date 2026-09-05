@@ -145,3 +145,4 @@ ceiling.
 - Updated 2026-09-05: Plan deterministic loot receipts and atomic pickup ownership — see [023-loot-ownership.md](023-loot-ownership.md).
 - Updated 2026-09-05: Plan shared inventory ownership, stash/vendor transactions, and GLoot view isolation — see [024-inventory-transactions.md](024-inventory-transactions.md).
 - Updated 2026-09-05: Plan deterministic crafting, immutable record replacement, and ordered rune effects — see [025-crafting-transactions.md](025-crafting-transactions.md).
+- Updated 2026-09-05: Plan character-lifetime XP, validated skill/passive allocation, and explicit respec — see [026-character-progression.md](026-character-progression.md).
