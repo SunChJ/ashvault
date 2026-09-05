@@ -423,7 +423,7 @@ distance and runtime ID. Movement uses actor-specific speed and radius through
 the shared bounded environment, stops at inclusive attack range, and quantizes
 position at the authoritative commit boundary for cross-platform replay
 stability. An enemy in range publishes an immutable attack intent on its exact
-cooldown tick; M2-06 must compose that intent through the ordinary ability and
+cooldown tick; StormweaverCombat composes that intent through the ordinary ability and
 damage pipeline.
 
 Enemy state-hash schema v4 converts every canonical float to a millionth-unit
@@ -434,6 +434,70 @@ replay hashes.
 Godot navigation maps may be introduced with authored room topology, and
 LimboAI may drive low-count boss or elite intent. Neither may become a second
 owner of ordinary-enemy simulation state.
+
+### 9.4 Stormweaver composition
+
+`StormweaverCatalog` authors six activation definitions, four entity-targeted
+impact definitions, delivery geometry, and defensive/Shock statuses. Geometry
+is selected before `AbilityExecutor` executes the impact graph. Projectile
+speed/lifetime and totem duration come from the activation effect; damage is
+never applied merely because a projectile was spawned.
+
+| Slot | Ability | Initial content |
+| --- | --- | --- |
+| 0 | Arc Bolt | 600 units/s, 60-tick lifetime, one target; 20 + 0.5 power lightning damage. |
+| 1 | Chain Lightning | 300-unit acquisition, 100-unit jumps, four targets; 24 + 0.5 power damage and Shock. |
+| 2 | Thunder Nova | 100-unit player-centered radius; 32 + 0.5 power damage. |
+| 3 | Static Ward | 30% incoming damage reduction for 240 ticks. |
+| 4 | Storm Totem | Aimed placement up to 100 swept units away; one nearest target within 150 units every 30 ticks, for 180 ticks; 12 + 0.5 power damage. |
+| 5 | Tempest Dash | 120 swept units over 12 ticks with damage immunity; replaces an interruptible cast. |
+
+Shock grants 10% additional incoming damage per stack, capped at three stacks,
+and refreshes its 180-tick duration. Ward and dash immunity cover the damage
+types present in configured impact graphs, including conversion destinations.
+They use the existing multiplicative conditional stage, so immunity remains
+zero damage even alongside Shock or Ward.
+
+Rank 5 uses shared effect transforms: damage bases increase by 50%, Ward lasts
+360 ticks, and Dash travels 180 units. Ranks 1–20 are accepted; no additional
+rank milestones are currently authored. Item transforms replace one damage
+effect per damaging skill after rank resolution. They preserve cast costs,
+delivery, and graph validation; item ownership and stat aggregation remain M3.
+The current slice uses power 10, critical chance 10%, and multiplier 1.5.
+
+`StormweaverCombat` accepts one player, immutable content, a movement environment,
+a seed, and optional enemy profiles with explicit attack definitions. Its tick
+order is:
+
+1. Validate commands and interruptions against a staged EntityWorld.
+2. Apply authored dash displacement instead of ordinary movement; interruption
+   stops movement and removes its protection in the same tick.
+3. Resolve activation, delivery hits, and defensive status expiry/application.
+4. Execute player impacts against those statuses. Newly applied Shock affects
+   subsequent ticks; it does not retroactively amplify other same-tick hits.
+5. Commit player damage in a preview before obtaining enemy attack intents,
+   preventing an enemy killed this tick from attacking.
+6. Resolve surviving enemy attacks, then publish entity/status/delivery/RNG
+   state and process events through the bounded CombatEventQueue.
+
+An invalid command or execution error publishes nothing, including resource
+cost, cooldown, sequence watermarks, RNG draws, and the previous report.
+Projectile and totem requests retain their original source and persist until
+their authored lifetime ends, even if the source dies. Empty chain casts consume
+cost/cooldown and have no impact. Acquisition chooses nearest distance, then
+runtime ID; the current command contract has no explicit cursor target ID.
+
+`report()` returns copied structured hit, damage, status, event, and hash
+records; `presentation_snapshot()` is an optional read-only entity view.
+Combined and 120-enemy replay hashes are checked by the same macOS/Windows
+fixture. Reproduce all six captures with:
+
+```sh
+"$ASHVAULT_GODOT" --headless --path project-ashvault \
+  --script res://tests/production/test_stormweaver_abilities.gd
+```
+
+HUD, visual/audio captures, and readability remain M2-07/M2-08 work.
 
 ## 10. Items and rarity semantics
 

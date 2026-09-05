@@ -131,8 +131,8 @@ Living enemies retain a valid target or choose the nearest player by distance
 and runtime ID, move through the shared bounded environment, and publish typed
 attack intents on exact fixed-tick cadence. Enemy positions are quantized at
 the authoritative commit boundary to keep replay state stable across supported
-platforms. Attack composition remains a later consumer and must route through
-`DamagePipeline`.
+platforms. StormweaverCombat composes attack intents through the shared ability executor
+and `DamagePipeline`.
 
 Enemy state-hash schema v4 serializes floats as millionth-unit fixed-point
 integers before hashing. This avoids platform-specific shortest-decimal
@@ -160,3 +160,21 @@ include canonical collision configuration in schema version 2. Loadout-enabled
 worlds use schema version 3 and expose resource, cast/recovery progress, and
 per-slot cooldowns for presentation. Effect execution remains a downstream
 consumer of the observable released phase.
+
+
+## Stormweaver active combat
+
+`abilities/StormweaverCatalog` owns the six fixed-slot activation definitions,
+on-hit graphs, rank milestones, and validated damage-effect replacements.
+`abilities/StormweaverCombat` composes them with entity, delivery, status, RNG,
+and bounded event runtimes. It stages the full tick before publication; failed
+execution cannot partially spend mana, spawn delivery, or consume randomness.
+
+Forced player displacement is an optional `EntityWorld.advance_tick` input. It
+replaces that tick's ordinary movement and always uses the configured swept
+collision environment. Dash owns its duration and cancellation in composition;
+EntityWorld remains the only authoritative position owner.
+
+See `docs/ARPG_KERNEL_SPEC.md` section 9.4 for authored values and tick ordering.
+The focused `tests/production/test_stormweaver_abilities.gd` suite emits JSON
+behavior captures and validates both combination and 120-enemy replay hashes.
