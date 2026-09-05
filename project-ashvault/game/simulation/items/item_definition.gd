@@ -1,6 +1,7 @@
 class_name ItemDefinition
 extends "res://game/content/content_definition.gd"
 
+const Effect = preload("res://game/simulation/items/item_stat_effect.gd")
 const StableIdContract = preload("res://game/content/stable_id.gd")
 
 var _display_name := ""
@@ -79,6 +80,24 @@ var _set_id: String = ""
 			_set_id = value
 
 
+var _two_handed: bool = false
+var _base_effects: Array[Resource] = []
+
+@export var two_handed: bool:
+	get:
+		return _two_handed
+	set(value):
+		if not is_frozen():
+			_two_handed = value
+
+@export var base_effects: Array[Resource]:
+	get:
+		return _base_effects.duplicate()
+	set(value):
+		if not is_frozen():
+			_base_effects = value.duplicate()
+
+
 func validation_error() -> String:
 	if not content_id.begins_with("item."):
 		return "Item definition ID must use the item namespace."
@@ -88,4 +107,12 @@ func validation_error() -> String:
 		return "Item equipment slot must be a stable slot ID."
 	if max_sockets < 0 or max_sockets > 32:
 		return "Item socket capacity must be between zero and 32."
-	return ""
+	if two_handed and equipment_slot != "slot.weapon":
+		return "Only weapons may occupy two hands."
+	return Effect.list_error(base_effects)
+
+
+func freeze() -> void:
+	for effect: Resource in _base_effects:
+		effect.freeze()
+	super.freeze()

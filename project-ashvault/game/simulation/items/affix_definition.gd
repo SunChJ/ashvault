@@ -1,6 +1,7 @@
 class_name AffixDefinition
 extends "res://game/content/content_definition.gd"
 
+const Modifier = preload("res://game/simulation/stats/stat_modifier.gd")
 const Tier = preload("res://game/simulation/items/affix_tier.gd")
 const StableIdContract = preload("res://game/content/stable_id.gd")
 
@@ -54,6 +55,40 @@ var _tiers: Array[Resource] = []
 			_tiers = value.duplicate()
 
 
+var _operation: int = Modifier.Operation.FLAT
+var _condition_id: String = ""
+var _priority: int = 0
+var _target_stat_id: String = ""
+
+@export var operation: int:
+	get:
+		return _operation
+	set(value):
+		if not is_frozen():
+			_operation = value
+
+@export var condition_id: String:
+	get:
+		return _condition_id
+	set(value):
+		if not is_frozen():
+			_condition_id = value
+
+@export var priority: int:
+	get:
+		return _priority
+	set(value):
+		if not is_frozen():
+			_priority = value
+
+@export var target_stat_id: String:
+	get:
+		return _target_stat_id
+	set(value):
+		if not is_frozen():
+			_target_stat_id = value
+
+
 func validation_error() -> String:
 	for pair: Array in [[content_id, "affix."], [group_id, "affix_group."], [stat_id, "stat."]]:
 		if not pair[0].begins_with(pair[1]) or not StableIdContract.is_valid(pair[0]):
@@ -78,6 +113,10 @@ func validation_error() -> String:
 			return error
 		if tier.number <= previous or tier.minimum_level < previous_level:
 			return "Affix tiers must have increasing numbers and non-decreasing level gates."
+		for amount: float in [tier.minimum, tier.maximum]:
+			var modifier_error: String = modifier(amount, "equipment.validation").error
+			if not modifier_error.is_empty():
+				return modifier_error
 		previous = tier.number
 		previous_level = tier.minimum_level
 	return ""
@@ -103,3 +142,9 @@ func supports(definition: Resource) -> bool:
 
 func conflicts(other: Resource) -> bool:
 	return group_id == other.group_id or excluded_affixes.has(other.content_id) or other.excluded_affixes.has(content_id)
+
+
+func modifier(amount: float, source_id: String) -> Dictionary:
+	var result := Modifier.new()
+	var error: String = result.configure(stat_id, operation, amount, source_id, condition_id, priority, target_stat_id)
+	return {"modifier": result if error.is_empty() else null, "error": error}
