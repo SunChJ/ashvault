@@ -142,3 +142,4 @@ ceiling.
 - Updated 2026-09-05: Establish immutable item definitions, simulation-owned instance UIDs, and plain-data snapshots — see [020-item-instances.md](020-item-instances.md).
 - Updated 2026-09-05: Define rarity policy and deterministic, validated affix generation — see [021-affix-generation.md](021-affix-generation.md).
 - Updated 2026-09-05: Add eight-slot atomic equipment and shared stat aggregation — see [022-equipment-stats.md](022-equipment-stats.md).
+- Updated 2026-09-05: Plan deterministic loot receipts and atomic pickup ownership — see [023-loot-ownership.md](023-loot-ownership.md).
