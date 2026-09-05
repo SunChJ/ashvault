@@ -86,8 +86,10 @@ the same complete transaction, recomputing stats for the requested tick and
 conditions. Item records, stat values, and Resource references are not duplicated
 into the equipment DTO.
 
-Inventory ownership/capacity across loadouts or actors remains M3-05; crafting,
-quality, and socket/rune mechanics remain M3-06. This module supplies shared
+[InventoryState](INVENTORY.md) wraps this resolver with owner and bag-capacity
+validation, atomically publishing displaced items and UID locations. Composed
+gameplay uses that wrapper; direct EquipmentState is a lower-level resolver.
+Crafting, quality, and socket/rune mechanics remain M3-06. This module supplies shared
 StatSnapshots for combat composition; the fixed M2 showcase still uses its
 existing defaults. Final named ability-rule effects remain content work.
 

@@ -1,9 +1,11 @@
 # Loot and pickup ownership
 
 `LootEntry` and `LootTable` are native authored Resources. `LootState` owns a
-run's occurrence receipts, reserved ground drops, and bounded pickup bags.
+run's occurrence receipts and delegates UID locations and bounded pickup bags
+to [InventoryState](INVENTORY.md).
 Configure it with the existing ItemWorld, initialized RngStreams, a stable
-creator ID, and validated tables. Tables and nested entries freeze together
+creator ID, validated tables, and the shared InventoryState. Omitting inventory
+creates a standalone instance. Tables and nested entries freeze together
 only after all tables validate. Reconfiguration is rejected.
 
 ## Selection
@@ -32,7 +34,8 @@ source, table, entry, requested level, draw (`-1` for empty tables), total
 weight, and the complete immutable generated item record (including rarity,
 affixes, tiers, values, and UID). No-drop receipts contain an empty item record.
 Receipts describe the original drop; live ground/bag state records its current
-location. Snapshots contain plain JSON-compatible data and defensive copies.
+location. Snapshot schema 2 embeds InventoryState instead of the former compact bags
+dictionary. Snapshots contain plain JSON-compatible data and defensive copies.
 Numeric normalization and validated save restore belong to SaveGameV1.
 
 ## Pickup
@@ -42,7 +45,7 @@ or execute pickup. Bags have capacity 0–10000 and count one slot per UID.
 `pickup(creator_id, owner_id, uid)` checks a live ground UID, matching creator
 and reserved owner, and available capacity before moving that same UID into
 the owner's bag. Full bags leave the drop untouched for retry. Duplicate or
-foreign pickups fail. Capacity cannot shrink below current contents.
+foreign pickups fail. Capacity cannot shrink past an occupied slot.
 
 The simulation composition must use one authoritative LootState per ItemWorld;
 these trusted in-process identity arguments are authority checks, not network
@@ -50,8 +53,8 @@ authentication. A future authority adapter must obtain creator/owner/occurrence
 from validated actor and source events rather than accepting client claims.
 Snapshots are inspectable evidence, not a live rollback or save import API.
 GLoot presentation may mirror this state but cannot grant item ownership.
-Stash/vendor/equipment transfers, save restore, and combat/presentation wiring
-are downstream work. Ground drops are not automatically expired or discarded.
+Stash/vendor/equipment transfers use InventoryState; save restore and
+combat/presentation wiring are downstream work. Ground drops are not automatically expired or discarded.
 
 ## Reproduction
 
