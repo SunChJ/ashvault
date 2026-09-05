@@ -180,7 +180,8 @@ func enemy_runtime_values() -> Array:
 func advance_tick(
 	commands: Array,
 	damage_results: Array = [],
-	cast_interruptions: Array = []
+	cast_interruptions: Array = [],
+	forced_displacements: Dictionary = {}
 ) -> RefCounted:
 	var expected_tick := _tick + 1
 	if not _is_configured:
@@ -190,6 +191,20 @@ func advance_tick(
 			null,
 			"Entity world is not configured."
 		)
+	for actor_id: Variant in forced_displacements:
+		if not actor_id is int or not _entities.has(actor_id):
+			return _rejected_movement(expected_tick, 0, "Forced movement requires a known actor.")
+		var displacement: Variant = forced_displacements[actor_id]
+		if (
+			not displacement is Vector2
+			or not displacement.is_finite()
+			or _movement_environment == null
+		):
+			return _rejected_movement(
+				expected_tick, actor_id, "Forced movement requires a finite vector and environment."
+			)
+		if not _entities[actor_id].is_player_controlled():
+			return _rejected_movement(expected_tick, actor_id, "Forced movement requires a player actor.")
 	var sorted_commands: Array = commands.duplicate()
 	for value: Variant in sorted_commands:
 		if not value is PlayerCommandContract or not value.is_configured():
@@ -336,14 +351,28 @@ func advance_tick(
 			if (
 				not moving_entity.is_player_controlled()
 				or not moving_entity.is_alive()
-				or moving_entity.movement_input().is_zero_approx()
+				or (
+					moving_entity.movement_input().is_zero_approx()
+					and not forced_displacements.has(runtime_id)
+				)
 			):
 				continue
-			var movement_result: Dictionary = _movement_environment.resolve_position(
-				moving_entity.position(),
-				moving_entity.movement_input(),
-				FIXED_DELTA_SECONDS
-			)
+			var movement_result: Dictionary
+			if forced_displacements.has(runtime_id):
+				var displacement: Vector2 = forced_displacements[runtime_id]
+				movement_result = _movement_environment.resolve_position_for(
+					moving_entity.position(),
+					displacement.normalized(),
+					FIXED_DELTA_SECONDS,
+					_movement_environment.actor_radius(),
+					displacement.length() / FIXED_DELTA_SECONDS
+				)
+			else:
+				movement_result = _movement_environment.resolve_position(
+					moving_entity.position(),
+					moving_entity.movement_input(),
+					FIXED_DELTA_SECONDS
+				)
 			var movement_error: String = movement_result.get("error", "")
 			if not movement_error.is_empty():
 				return _rejected_movement(expected_tick, runtime_id, movement_error)
@@ -781,4 +810,19 @@ static func _result(
 		enemy_attack_intents,
 		combat_events
 	)
+	return result
+
+
+# Tick methods copy changed values before mutation; staging can share immutable inputs.
+func _duplicate_world() -> RefCounted:
+	var result: RefCounted = get_script().new()
+	result._tick = _tick
+	result._entities = _entities.duplicate()
+	result._last_client_sequences = _last_client_sequences.duplicate()
+	result._movement_environment = _movement_environment
+	result._ability_loadouts = _ability_loadouts.duplicate()
+	result._enemy_definitions = _enemy_definitions.duplicate()
+	result._enemy_states = _enemy_states.duplicate()
+	result._state_hash = _state_hash
+	result._is_configured = _is_configured
 	return result

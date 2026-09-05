@@ -485,3 +485,15 @@ static func _result(
 		diagnostics
 	)
 	return result
+
+
+# Tick methods copy changed values before mutation; staging can share immutable inputs.
+func _duplicate_world() -> RefCounted:
+	var result: RefCounted = get_script().new()
+	result._tick = _tick
+	result._next_runtime_id = _next_runtime_id
+	result._active_states = _active_states.duplicate()
+	result._last_request_id = _last_request_id
+	result._state_hash = _state_hash
+	result._is_configured = _is_configured
+	return result

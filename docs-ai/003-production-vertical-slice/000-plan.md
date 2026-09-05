@@ -132,3 +132,6 @@ ceiling.
 - Updated 2026-09-02: M2 ordinary enemies extend the entity world with compact
   seek/attack state, typed attack intents, and transition-owned kill events —
   see [`016-enemy-runtime.md`](016-enemy-runtime.md).
+- Updated 2026-09-05: M2 composes six authored Stormweaver abilities through
+  shared cast, delivery, status, and damage contracts — see
+  [017-stormweaver-abilities.md](017-stormweaver-abilities.md).
