@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "build_id": "build.reference.chain_lightning",
+  "skills": {
+    "chain_lightning": 5
+  },
+  "rotation": [
+    {
+      "tick": 1,
+      "skill": "chain_lightning"
+    },
+    {
+      "tick": 71,
+      "skill": "chain_lightning"
+    },
+    {
+      "tick": 141,
+      "skill": "chain_lightning"
+    },
+    {
+      "tick": 211,
+      "skill": "chain_lightning"
+    }
+  ],
+  "duration_ticks": 240,
+  "root_seed": 42,
+  "loadout": {
+    "slot.weapon": {
+      "bases": [
+        "item.reference.white"
+      ],
+      "affixes": [],
+      "rarities": [
+        "white"
+      ]
+    }
+  },
+  "conditions": [],
+  "objective": "damage",
+  "base_stats": {
+    "stat.offense.power": 10,
+    "stat.critical.chance": 0,
+    "stat.critical.multiplier": 1.5,
+    "stat.defense.armor": 0
+  }
+}

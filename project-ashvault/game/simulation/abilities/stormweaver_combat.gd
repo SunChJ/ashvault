@@ -22,6 +22,9 @@ const Queue = preload("res://game/simulation/events/combat_event_queue.gd")
 const Emission = preload("res://game/simulation/events/combat_event_emission.gd")
 const EventRequest = preload("res://game/simulation/events/combat_event_request.gd")
 
+const Snapshot = preload("res://game/simulation/stats/stat_snapshot.gd")
+const DamageModifier = preload("res://game/simulation/combat/damage_modifier.gd")
+
 const TOTEM_PLACEMENT_DISTANCE := 100.0
 
 var _catalog: RefCounted
@@ -44,6 +47,9 @@ var _dash_distance_per_tick := 0.0
 var _dash_end_tick := 0
 var _last_report: Dictionary = {}
 var _content_hash := ""
+var _player_stats: RefCounted
+var _player_mitigation: Array = []
+var _player_tick_stats: RefCounted
 var _tick_stats: RefCounted
 var _configured := false
 
@@ -54,7 +60,9 @@ func configure(
 	catalog: Variant,
 	seed_value: int = 1,
 	enemy_definitions: Dictionary = {},
-	enemy_abilities: Dictionary = {}
+	enemy_abilities: Dictionary = {},
+	player_stats: Variant = null,
+	player_mitigation: Array = []
 ) -> String:
 	if _configured:
 		return "Stormweaver combat is already configured."
@@ -62,6 +70,19 @@ func configure(
 		return "Combat requires a configured Stormweaver catalog."
 	if not environment is Movement or not environment.is_configured():
 		return "Combat requires a configured movement environment."
+	if player_stats != null:
+		if not player_stats is Snapshot or player_stats.tick() < 0:
+			return "Player stats require a published StatSnapshot."
+		for id: String in [Catalog.POWER, Catalog.CRIT, Catalog.CRIT_MULTIPLIER]:
+			if not player_stats.has_stat(id) or not is_finite(player_stats.value(id)):
+				return "Player stats require finite power and critical values."
+		if player_stats.value(Catalog.POWER) < 0 or player_stats.value(Catalog.CRIT) < 0 or player_stats.value(Catalog.CRIT) > 0.95 or player_stats.value(Catalog.CRIT_MULTIPLIER) < 1:
+			return "Player combat stats are outside their supported ranges."
+	var mitigation_ids: Dictionary = {}
+	for modifier: Variant in player_mitigation:
+		if not modifier is DamageModifier or not modifier.is_configured() or mitigation_ids.has(modifier.identity_key()):
+			return "Player mitigation requires distinct configured damage modifiers."
+		mitigation_ids[modifier.identity_key()] = true
 	var ids: Array = []
 	var player_id := 0
 	for entity: Variant in entities:
@@ -113,6 +134,13 @@ func configure(
 	for attack_id: String in attack_ids:
 		attack_values.append([attack_id, Catalog.ability_values(enemy_abilities[attack_id])])
 	_content_hash = JSON.stringify([catalog.canonical_values(), attack_values, Catalog.default_stats().values()]).sha256_text()
+	_player_stats = player_stats
+	_player_mitigation = player_mitigation.duplicate()
+	if player_stats != null or not player_mitigation.is_empty():
+		var mitigation_values: Array = []
+		for modifier: RefCounted in player_mitigation:
+			mitigation_values.append(modifier.explanation_fields())
+		_content_hash = JSON.stringify([_content_hash, player_stats.values() if player_stats != null else {}, mitigation_values]).sha256_text()
 	_rng = Streams.new()
 	_rng.initialize(seed_value)
 	_configured = true
@@ -184,6 +212,10 @@ func advance_tick(commands: Array = [], interruptions: Array = []) -> String:
 func _step(commands: Array, interruptions: Array) -> String:
 	var next_tick := tick() + 1
 	_tick_stats = Catalog.default_stats(next_tick)
+	_player_tick_stats = _tick_stats
+	if _player_stats != null:
+		_player_tick_stats = Snapshot.new()
+		Catalog._checked(_player_tick_stats._configure(next_tick, _player_stats.values(), {}))
 	var preview: RefCounted = _world._duplicate_world()
 	var accepted: RefCounted = preview.advance_tick(commands, [], interruptions)
 	if not accepted.is_success():
@@ -321,8 +353,10 @@ func _execute(ability: Resource, rank_value: int, source: int, target: int, posi
 	if statuses != null:
 		conditions = statuses.active_condition_ids(target)
 		modifiers = statuses.damage_modifiers_for(target)
+	if target == _player_id:
+		modifiers.append_array(_player_mitigation)
 	var error: String = context.configure(rank_value, tick_value, source, target, _next_origin,
-		_tick_stats, roll, conditions, modifiers, position, direction)
+		_player_tick_stats if source == _player_id else _tick_stats, roll, conditions, modifiers, position, direction)
 	_next_origin += 1
 	if not error.is_empty():
 		return Executor._result([], error)
@@ -390,6 +424,8 @@ func _delivery_targets(world: RefCounted) -> Array:
 func _duplicate_combat() -> RefCounted:
 	var result: RefCounted = get_script().new()
 	result._catalog = _catalog
+	result._player_stats = _player_stats
+	result._player_mitigation = _player_mitigation
 	result._environment = _environment
 	result._enemy_definitions = _enemy_definitions
 	result._enemy_abilities = _enemy_abilities
