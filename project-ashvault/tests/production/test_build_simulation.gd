@@ -147,6 +147,9 @@ func _test_invalid_inputs(fixture: Dictionary) -> void:
 func _test_gate(reports: Array) -> void:
 	_check(not Gate.evaluate([]).passed, "Empty gate input must fail.")
 	_check(not Gate.evaluate([reports[0], reports[0], reports[2], reports[3]]).passed, "Duplicate and missing reference profiles must fail.")
+	var future := reports.duplicate(true)
+	future[0].schema_version = 2
+	_check(not Gate.evaluate(future).passed, "Unknown comparison schema versions must fail closed.")
 	var ties := reports.duplicate(true)
 	for candidate: Dictionary in ties[0].slots[0].candidates:
 		if candidate.item.rarity == "red":

@@ -11,7 +11,7 @@ static func evaluate(reports: Array) -> Dictionary:
 	var coverage: Dictionary = {}
 	var observed: Array = []
 	for report: Variant in reports:
-		if not report is Dictionary or not report.get("build") is Dictionary or not report.build.get("build_id") is String or not report.get("slots") is Array or report.slots.is_empty():
+		if not report is Dictionary or not Build.integer(report.get("schema_version"), 1, 1) or not report.get("build") is Dictionary or not report.build.get("build_id") is String or not report.get("slots") is Array or report.slots.is_empty():
 			errors.append("Rarity gate requires non-empty comparison reports.")
 			continue
 		var id: String = report.build.build_id
