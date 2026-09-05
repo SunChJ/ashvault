@@ -32,24 +32,29 @@ Instances expose identity getters and defensive `snapshot()` copies; their
 underscore initializer and backing data are internal to the simulation module.
 Future crafting replaces validated records through world-owned operations.
 
+Rarity/affix publication and generation are implemented in the
+[affix generation guide](AFFIX_GENERATION.md). ItemCatalog accepts a published
+AffixCatalog as its optional third load argument; an omitted catalog is empty.
+
 ## Instance fields
 
 | Field | Contract |
 | --- | --- |
 | `uid` | World-owned string identity |
 | `definition_id` | Published stable `item.*` ID |
-| `item_level` | Positive JSON-safe integer; default 1 |
+| `item_level` | Positive 32-bit integer; default 1 |
 | `rarity` | `white`, `blue`, `gold`, `green`, `purple`, `red`, `set`; default white |
-| `affixes` | Ordered, unique stable `affix.*` IDs; at most 32 |
-| `rolls` | Ordered `{affix_id, tier, value}` records; one per referenced attached affix, at most 32; positive integer tier and finite numeric value |
+| `affixes` | Ordered, unique published `affix.*` IDs; at most four under rarity rules |
+| `rolls` | Ordered `{affix_id, tier, value}` records; exactly one per attached affix; eligible tier and bounded numeric value |
 | `sockets` | Ordered strings: empty socket `""` or stable `rune.*` ID, bounded by definition capacity (0–32) |
 | `quality` | Non-negative JSON-safe integer; default 0 |
 | `metadata` | Optional JSON-only descriptive provenance; does not define mechanical behavior |
 
-Affix/roll/socket collections default to empty. M3-02 supplies actual affix
-catalog lookup, rarity limits, legal tiers, and roll generation; M3-03 supplies
-equipment-slot semantics; M3-06 supplies crafting rules and rune lookup. The
-current checks establish structural validity without inventing those rules.
+Affix/roll/socket collections default to empty. The affix catalog and rarity
+rules validate lookup, counts, groups, exclusions, slots/bases, tiers, levels,
+and numeric bounds on creation and restoration. M3-03 supplies equipment-slot
+semantics; M3-06 supplies crafting rules and rune lookup. The current checks do
+not implement equipment transactions or crafting semantics.
 Metadata permits null, booleans, strings, finite safe numbers, arrays, and
 string-keyed dictionaries. It rejects Resources, Nodes, other engine Variants,
 cycles/excessive depth, and integers outside ±(2^53−1). Limits are eight nesting

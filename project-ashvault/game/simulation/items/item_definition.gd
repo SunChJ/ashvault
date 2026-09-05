@@ -29,6 +29,56 @@ var _max_sockets := 0
 			_max_sockets = value
 
 
+var _allowed_rarities: Array[String] = ["white", "blue", "gold"]
+var _fixed_affixes: Array[String] = []
+var _drop_source_id: String = ""
+var _interaction_id: String = ""
+var _rule_id: String = ""
+var _set_id: String = ""
+
+@export var allowed_rarities: Array[String]:
+	get:
+		return _allowed_rarities.duplicate()
+	set(value):
+		if not is_frozen():
+			_allowed_rarities = value.duplicate()
+
+@export var fixed_affixes: Array[String]:
+	get:
+		return _fixed_affixes.duplicate()
+	set(value):
+		if not is_frozen():
+			_fixed_affixes = value.duplicate()
+
+@export var drop_source_id: String:
+	get:
+		return _drop_source_id
+	set(value):
+		if not is_frozen():
+			_drop_source_id = value
+
+@export var interaction_id: String:
+	get:
+		return _interaction_id
+	set(value):
+		if not is_frozen():
+			_interaction_id = value
+
+@export var rule_id: String:
+	get:
+		return _rule_id
+	set(value):
+		if not is_frozen():
+			_rule_id = value
+
+@export var set_id: String:
+	get:
+		return _set_id
+	set(value):
+		if not is_frozen():
+			_set_id = value
+
+
 func validation_error() -> String:
 	if not content_id.begins_with("item."):
 		return "Item definition ID must use the item namespace."
