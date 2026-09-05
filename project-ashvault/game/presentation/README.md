@@ -91,3 +91,10 @@ Use `--enemies 12` for the representative encounter. Add
 `--presentation-disabled` to compare the final authoritative hash without the
 HUD, camera effects, drawing, or sound. `simulation_p95_us` is a separately
 reported observation, not part of the replay hash or the M5 performance gate.
+
+## Authored room modules
+
+`dungeon/AuthoredRoom` composes a typed room descriptor with presentation-only
+floor, connector, and socket visuals. Scene transforms never author simulation
+geometry. See the [room contract](../simulation/dungeon/README.md) and the five
+native scene fixtures under `tests/fixtures/rooms/`.

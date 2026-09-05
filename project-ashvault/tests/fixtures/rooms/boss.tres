@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="RoomDefinition" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/simulation/dungeon/room_definition.gd" id="1_room"]
+[ext_resource type="Script" path="res://game/simulation/dungeon/room_connector.gd" id="2_connector"]
+[ext_resource type="Script" path="res://game/simulation/dungeon/encounter_socket.gd" id="3_socket"]
+
+[sub_resource type="Resource" id="ConnectorWest"]
+script = ExtResource("2_connector")
+connector_id = "connector.west"
+facing = 3
+offset = 4
+width = 2
+clearance = 2
+
+[sub_resource type="Resource" id="ConnectorEast"]
+script = ExtResource("2_connector")
+connector_id = "connector.east"
+facing = 1
+offset = 4
+width = 2
+clearance = 2
+
+[sub_resource type="Resource" id="SocketPrimary"]
+script = ExtResource("3_socket")
+socket_id = "socket.primary"
+kind = 3
+area = Rect2i(5, 4, 2, 2)
+
+[sub_resource type="Resource" id="SocketExit"]
+script = ExtResource("3_socket")
+socket_id = "socket.exit"
+kind = 4
+area = Rect2i(5, 7, 2, 1)
+
+[resource]
+script = ExtResource("1_room")
+content_id = "room.fixture.boss"
+role = 4
+bounds = Rect2i(0, 0, 12, 10)
+connectors = Array[Resource]([SubResource("ConnectorWest"), SubResource("ConnectorEast")])
+sockets = Array[Resource]([SubResource("SocketPrimary"), SubResource("SocketExit")])

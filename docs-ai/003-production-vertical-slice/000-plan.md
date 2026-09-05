@@ -149,3 +149,4 @@ ceiling.
 - Updated 2026-09-05: Plan SaveGameV1 validation, migration, atomic replacement, and backup recovery — see [027-save-game-v1.md](027-save-game-v1.md).
 
 - Updated 2026-09-05: Plan Build loadout simulation and rarity-value evidence — see [028-build-simulation.md](028-build-simulation.md).
+- Updated 2026-09-05: Plan authored room descriptors and deterministic connector validation — see [029-room-modules.md](029-room-modules.md).
